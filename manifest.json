@@ -1,0 +1,26 @@
+{
+  "name": "小鱼 · 每周六家宴 · 抽奖",
+  "short_name": "小鱼家宴",
+  "description": "工作日减脂周末请客吃饭，粉丝AA菜钱来家里吃一桌家常菜",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fbf4ea",
+  "theme_color": "#a03f26",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='96' fill='%23a03f26'/%3E%3Ctext x='256' y='340' font-size='300' text-anchor='middle' fill='%23f6e3bf' font-family='serif' font-weight='500'%3E鱼%3C/text%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='96' fill='%23a03f26'/%3E%3Ctext x='256' y='340' font-size='300' text-anchor='middle' fill='%23f6e3bf' font-family='serif' font-weight='500'%3E鱼%3C/text%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

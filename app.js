@@ -103,6 +103,27 @@
     toast(on ? '已进入主播管理态' : '已退出主播管理态');
   }
 
+  /* ---------------- 本地持久化 ---------------- */
+  var STORE_KEY = 'xiaoyu_draw_v1';
+  function loadStore() {
+    try {
+      var raw = localStorage.getItem(STORE_KEY);
+      if (!raw) return false;
+      var data = JSON.parse(raw);
+      if (Array.isArray(data.people)) people = data.people;
+      if (Array.isArray(data.records)) records = data.records;
+      return true;
+    } catch (e) { return false; }
+  }
+  function saveStore() {
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify({
+        people: people,
+        records: records
+      }));
+    } catch (e) { /* 存储满了或禁用，静默忽略 */ }
+  }
+
   /* ---------------- 音效（WebAudio 合成） ---------------- */
   var soundOn = true;
   var audioCtx = null;
@@ -286,6 +307,8 @@
     var btn = $('drawBtn');
     btn.disabled = rolling || pool.length === 0;
     btn.querySelector('span').textContent = rolling ? '抽 奖 中' : (pool.length === 0 ? '无 人' : '抽\u00A0\u00A0奖');
+
+    saveStore();
   }
 
   /* ---------------- 应用名单 ---------------- */
@@ -526,6 +549,7 @@
 
   /* ---------------- 事件 ---------------- */
   document.addEventListener('DOMContentLoaded', function () {
+    loadStore();  // 优先从本地恢复名单和中奖记录
     render();
 
     /* ---------------- 滚动入场动画 ---------------- */
