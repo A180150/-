@@ -11,8 +11,7 @@ const ASSETS = [
   './manifest.json',
   './robots.txt',
   './404.html',
-  './assets/hero.png',
-  './assets/hero.webp'
+  './assets/hero.jpg'
 ];
 
 self.addEventListener('install', (e) => {

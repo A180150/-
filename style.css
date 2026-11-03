@@ -1129,8 +1129,8 @@ body.admin .admin-flag{display:inline-flex}
   .hero-inner{gap:34px}
   .hv-frame{width:min(100%,300px)}
   .hv-badge{font-size:10px;padding:6px 13px}
-  .hv-badge.b1{left:-6px;top:18px}
-  .hv-badge.b2{right:-6px;bottom:20px}
+  .hv-badge.b1{left:12px;top:14px}
+  .hv-badge.b2{right:12px;bottom:16px}
   .section{padding:28px 16px}
   .sec-head{flex-direction:column;align-items:flex-start;gap:8px;margin-bottom:24px}
   .sec-head h2{font-size:22px;letter-spacing:.14em}
