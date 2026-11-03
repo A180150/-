@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#fbf4ea" />
+<title>小鱼 · 每周六家宴 · 抽奖</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23a03f26'/%3E%3Ccircle cx='32' cy='32' r='25' fill='none' stroke='%23d4a857' stroke-width='2'/%3E%3Ctext x='32' y='43' font-size='32' text-anchor='middle' fill='%23f6e3bf' font-family='serif'%3E鱼%3C/text%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://miaoda.feishu.cn" />
+<link rel="stylesheet" href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600&display=swap" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="grain"></div>
+<div class="particles" id="particles"></div>
+<div class="scroll-progress" id="scrollProgress"></div>
+<canvas id="confetti"></canvas>
+
+<header class="nav">
+  <div class="who">
+    <div class="avatar">鱼</div>
+    <div class="who-text">
+      <div class="nick">小鱼 <span>工作日减脂 · 周末家宴</span></div>
+      <div class="dyid">抖音号 370113481</div>
+    </div>
+  </div>
+  <div class="nav-right">
+    <span class="stat"><b>2731</b> 粉丝</span>
+    <span class="stat"><b>2.7万</b> 获赞</span>
+    <nav class="nav-links">
+      <a href="#notice">须知</a>
+      <a href="#drawSection">抽奖</a>
+      <a href="#games">游戏</a>
+      <a href="#truth">真心话</a>
+    </nav>
+    <button class="btn ghost" id="toDraw">开始抽奖</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- 主播主页 -->
+  <section class="hero">
+    <div class="glow g1"></div>
+    <div class="glow g2"></div>
+    <div class="glow g3"></div>
+
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <p class="kicker">每 周 六 · 家 宴 名 额</p>
+        <h1 class="title" data-text="抽你来家里吃顿饭">抽你来<br /><span>家里吃顿饭</span></h1>
+        <p class="lede">
+          工作日自律减脂，周末把厨房变成饭局。<br />
+          每周六从粉丝里抽几位，AA 菜钱，来我家吃一桌家常菜。
+        </p>
+
+        <div class="tags">
+          <span>已瘦 42 斤</span>
+          <span>北京 · 26 岁</span>
+          <span>工作日减脂餐</span>
+          <span>周末家宴</span>
+        </div>
+
+        <div class="hero-actions">
+          <button class="btn solid" id="ctaDraw">开 始 抽 奖</button>
+          <a class="link" href="#about">看看这个厨房</a>
+        </div>
+      </div>
+
+      <div class="hero-visual">
+        <div class="hv-frame">
+          <span class="hv-steam s1"></span>
+          <span class="hv-steam s2"></span>
+          <img src="assets/hero.png" alt="一桌热气腾腾的家常菜" />
+          <span class="hv-badge b1">六 菜 起 步</span>
+          <span class="hv-badge b2">AA 菜 钱</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 抽奖控制台 -->
+  <section class="section" id="drawSection">
+    <div class="sec-head">
+      <h2>抽奖台</h2>
+      <p>主播操作 · 粉丝围观 · 抽完自动弹出大屏</p>
+    </div>
+
+    <div class="panel">
+      <div class="panel-left">
+        <div class="lbl-row">
+          <label class="lbl">参与名单</label>
+          <span class="admin-flag" id="adminFlag">主播管理态</span>
+          <div class="stats" id="stats">
+            <span class="stat-item"><b id="stTotal">0</b><i>已导入</i></span>
+            <span class="stat-item"><b id="stPool">0</b><i>待抽</i></span>
+            <span class="stat-item drawn-stat"><b id="stDrawn">0</b><i>已中奖</i></span>
+            <span class="stat-item rigged-stat"><b id="stRigged">0</b><i>内定</i></span>
+          </div>
+        </div>
+        <textarea id="namesInput" spellcheck="false" placeholder="每行一个名字，或直接粘贴微信接龙文本&#10;&#10;1. 独孤求败 于国辉&#10;2. 六条&#10;3. 小千主义"></textarea>
+        <div class="row">
+          <button class="btn solid small" id="applyNames">应用名单</button>
+          <button class="btn ghost small" id="demoNames">填入示例</button>
+          <button class="btn ghost small" id="clearNames">清空</button>
+          <button class="btn ghost small" id="resetDrawn">重置已中奖</button>
+          <button class="btn ghost small" id="clearRigged">清空内定</button>
+        </div>
+        <div class="chips" id="chips"></div>
+        <p class="rigged-hint" id="riggedHint" hidden>本轮将有 <b>0</b> 位内定必中 · 点击名单可取消</p>
+        <p class="chips-tip">点击名单上的人，标记「内定」本轮必中 · 观众与截图不显示</p>
+      </div>
+
+      <div class="panel-right">
+        <label class="lbl">奖品名称</label>
+        <input class="field" id="prizeInput" type="text" maxlength="16" value="家宴名额" />
+
+        <label class="lbl">本轮抽几人</label>
+        <input class="field" id="countInput" type="number" min="1" max="20" value="3" />
+
+        <div class="draw-wrap">
+          <button class="draw-btn" id="drawBtn"><span>抽&nbsp;&nbsp;奖</span></button>
+        </div>
+
+        <button class="sound-toggle" id="soundToggle" type="button"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path class="wv" d="M16 8.5a5 5 0 0 1 0 7M18.6 6a8.5 8.5 0 0 1 0 12"/></svg><span class="st-txt">音效 开</span></button>
+        <p class="hint">点击抽奖 · 空格开始 / 跳过 · 抽完自动弹出中奖大屏</p>
+      </div>
+    </div>
+
+    <div class="records-wrap">
+      <div class="lbl-row">
+        <label class="lbl">已开奖</label>
+        <span class="count" id="recordCount">0 轮</span>
+      </div>
+      <div class="records" id="records"></div>
+    </div>
+  </section>
+
+  <!-- 当天须知 -->
+  <section class="section" id="notice">
+    <div class="sec-head">
+      <h2>当 天 须 知</h2>
+      <p>来之前看一眼 · 开心赴约</p>
+    </div>
+
+    <div class="notice-grid">
+      <article class="notice-card">
+        <div class="nc-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+        <h3>到店时间</h3>
+        <p>周末饭局下午 <b>1-2 点</b> 到，晚上 <b>7-8 点</b> 开饭，具体以开饭时间为准；平时举办另行通知。</p>
+      </article>
+
+      <article class="notice-card">
+        <div class="nc-icon"><svg viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4.5V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v.5M9 9h6M9 13h6M9 17h4"/></svg></div>
+        <h3>放鸽子规则</h3>
+        <p>被抽到有事请<b>提前告知</b>，我会抽其他人；放鸽子的直接取消吃饭资格。</p>
+      </article>
+
+      <article class="notice-card">
+        <div class="nc-icon"><svg viewBox="0 0 24 24"><path d="M8 3v6.5M8 9.5a1.8 1.8 0 0 1-1.8 1.8V21M8 9.5a1.8 1.8 0 0 0 1.8 1.8V21"/><path d="M16 3c-1.6 0-2.4 1.2-2.4 3.2V12M16 3v18"/></svg></div>
+        <h3>支持点菜</h3>
+        <p>被抽到的朋友可以<b>点菜</b>，想吃啥提前说，厨房尽量安排。</p>
+      </article>
+
+      <article class="notice-card">
+        <div class="nc-icon"><svg viewBox="0 0 24 24"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6z"/><path d="M9 12l2 2 4-4"/></svg></div>
+        <h3>安全第一</h3>
+        <p>线下约饭注意安全，<b>出事自行负责</b>，大家都是成年人，互相照应。</p>
+      </article>
+
+      <article class="notice-card">
+        <div class="nc-icon"><svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="9" rx="4"/><path d="M7 10.5v4M5 12.5h4"/><circle cx="16.4" cy="11.6" r="0.8" fill="currentColor" stroke="none"/><circle cx="18.2" cy="13.4" r="0.8" fill="currentColor" stroke="none"/></svg></div>
+        <h3>饭后娱乐</h3>
+        <p>有空会组织<b>五子棋、王者内战</b>等，赢了还能送吃饭名额。</p>
+      </article>
+
+      <article class="notice-card">
+        <div class="nc-icon"><svg viewBox="0 0 24 24"><path d="M3 16h18c0 3.5-4 6-9 6s-9-2.5-9-6z"/><path d="M5 16c0-1.5 1-2.5 2-2.5 1.4 0 2.2.9 2.4 2.5M19 16c0-1.5-1-2.5-2-2.5-1.4 0-2.2.9-2.4 2.5M9 4.5h6"/></svg></div>
+        <h3>一次性餐具</h3>
+        <p>为安全起见统一使用<b>一次性碗筷、纸杯</b>，吃完不用刷，费用 AA。</p>
+      </article>
+
+      <article class="notice-card">
+        <div class="nc-icon"><svg viewBox="0 0 24 24"><circle cx="8" cy="6.5" r="2.2"/><circle cx="16" cy="6.5" r="2.2"/><path d="M3.5 20.5v-2.5a4.3 4.3 0 0 1 4.3-4.3h.4M20.5 20.5v-2.5a4.3 4.3 0 0 0-4.3-4.3h-.4M8 13.7h8"/></svg></div>
+        <h3>一起动手</h3>
+        <p>所有人一起<b>买菜、洗菜、备菜</b>，我负责做饭、刷盘子、收拾屋场。想吃现成的吃完就走的，就不用接龙了。</p>
+      </article>
+
+      <article class="notice-card">
+        <div class="nc-icon"><svg viewBox="0 0 24 24"><path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6z"/><path d="M18.5 14.5l.9 2.1 2.1.9-2.1.9-.9 2.1-.9-2.1-2.1-.9 2.1-.9z"/></svg></div>
+        <h3>一起出去玩</h3>
+        <p>后面会组织一起出去玩，前提是大家<b>和睦相处</b>，费用 AA。</p>
+      </article>
+    </div>
+  </section>
+
+  <!-- 关于 / 粉丝视角 -->
+  <section class="section" id="about">
+    <div class="sec-head">
+      <h2>这个厨房</h2>
+      <p>工作日算热量，周末算人情</p>
+    </div>
+
+    <div class="cards">
+      <article class="card">
+        <p class="card-num">01</p>
+        <h3>工作日减脂</h3>
+        <p>低油低盐的家常做法，怎么吃饱又不长肉。已瘦 42 斤，全靠自己做饭。</p>
+      </article>
+      <article class="card">
+        <p class="card-num">02</p>
+        <h3>每周六家宴</h3>
+        <p>六道菜起步，从备菜到上桌全程实拍。粉丝 AA 菜钱，来家里坐一桌。</p>
+      </article>
+      <article class="card">
+        <p class="card-num">03</p>
+        <h3>上门做饭</h3>
+        <p>北京地区可约上门做饭，家常菜 / 减脂餐都能做，收费，私信询价。</p>
+      </article>
+    </div>
+
+    <div class="contact">
+      <div class="contact-inner">
+        <p class="kicker">想 吃 饭 · 先 成 为 粉 丝</p>
+        <p class="contact-line">微信 <b>V15713243914</b></p>
+        <p class="contact-line muted">抖音号 370113481 · 每周六抽粉丝到家吃饭</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 桌游 / 游戏推荐 -->
+  <section class="section" id="games">
+    <div class="sec-head">
+      <h2>饭 后 游 戏</h2>
+      <p>吃饱了 · 玩点啥</p>
+    </div>
+
+    <div class="game-grid">
+      <article class="game-card">
+        <div class="game-badge">UNO</div>
+        <h3>UNO 优诺牌</h3>
+        <p class="game-tag">卡牌 · 2-10 人 · 约 15 分钟</p>
+        <div class="game-rules">
+          <p><b>目标：</b>第一个把手上的牌出完。</p>
+          <p><b>基本规则：</b></p>
+          <ul>
+            <li>每人发 7 张牌，牌堆顶翻一张作为起始牌。</li>
+            <li>出牌必须与上家牌<b>同数字</b>或<b>同颜色</b>。</li>
+            <li><b>功能牌：</b>跳过（下家停一轮）、反转（出牌顺序反转）、+2（下家摸 2 张并停一轮）。</li>
+            <li><b>万能牌：</b>变色（指定下一张颜色）、+4（指定颜色且下家摸 4 张停一轮）。</li>
+            <li>剩 1 张牌时必须喊 <b>"UNO!"</b>，被抓到没喊要罚摸 2 张。</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="game-card">
+        <div class="game-badge">卧底</div>
+        <h3>谁是卧底</h3>
+        <p class="game-tag">词类 · 4-12 人 · 约 10 分钟</p>
+        <div class="game-rules">
+          <p><b>目标：</b>平民找出卧底，卧底隐藏到最后。</p>
+          <p><b>基本规则：</b></p>
+          <ul>
+            <li>每人拿到一个词，平民词相同，卧底词<b>相近但不同</b>。</li>
+            <li>每轮每人用一句话描述自己的词，不能直接说出词。</li>
+            <li>投票选出最像卧底的人，得票最多者出局。</li>
+            <li>卧底全部出局 → 平民胜；卧底存活到最后一人 → 卧底胜。</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="game-card">
+        <div class="game-badge">五子棋</div>
+        <h3>五子棋</h3>
+        <p class="game-tag">对弈 · 2 人 · 约 5-10 分钟</p>
+        <div class="game-rules">
+          <p><b>目标：</b>率先在横、竖、斜方向连成 <b>5 子</b>。</p>
+          <p><b>基本规则：</b></p>
+          <ul>
+            <li>黑棋先行，双方轮流落子。</li>
+            <li>棋子落在交叉点上，落子不可移动。</li>
+            <li>任意方向连成 5 子即获胜。</li>
+            <li>娱乐局可玩「禁手」（黑棋禁三三、四四、长连）增加难度。</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="game-card">
+        <div class="game-badge">王者</div>
+        <h3>王者内战</h3>
+        <p class="game-tag">手游 · 5v5 · 约 15-20 分钟</p>
+        <div class="game-rules">
+          <p><b>目标：</b>推掉对方水晶。</p>
+          <p><b>基本规则：</b></p>
+          <ul>
+            <li>到场的人凑两队，随机或自选阵容。</li>
+            <li>按正常王者 5v5 规则打一把。</li>
+            <li>赢的队伍可以<b>送吃饭名额</b>（具体看当天安排）。</li>
+            <li>不搞人身攻击，娱乐为主，输了请喝奶茶。</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="game-card">
+        <div class="game-badge">你画我猜</div>
+        <h3>你画我猜</h3>
+        <p class="game-tag">绘画 · 3-8 人 · 约 10 分钟</p>
+        <div class="game-rules">
+          <p><b>目标：</b>猜对画的词得分。</p>
+          <p><b>基本规则：</b></p>
+          <ul>
+            <li>轮流当画师，抽到词后在纸上画出来。</li>
+            <li>画师不能说话、不能写字，只能画。</li>
+            <li>其他人抢答，猜对得分。</li>
+            <li>限时 1 分钟，没人猜中画师不得分。</li>
+          </ul>
+        </div>
+      </article>
+
+      <article class="game-card">
+        <div class="game-badge">真心话</div>
+        <h3>真心话大冒险</h3>
+        <p class="game-tag">互动 · 2-10 人 · 不限时</p>
+        <div class="game-rules">
+          <p><b>目标：</b>被选中的人选择「真心话」或「大冒险」并完成。</p>
+          <p><b>基本规则：</b></p>
+          <ul>
+            <li>用转盘 / 抽牌 / 石头剪刀布选出被惩罚的人。</li>
+            <li>选真心话 → 如实回答一个问题；选大冒险 → 完成一个任务。</li>
+            <li>拒绝回答或完成 → 罚酒 / 罚表演节目。</li>
+            <li>问题和任务不能过分，点到为止，开心最重要。</li>
+          </ul>
+        </div>
+        <a class="game-link" href="#truth">查看题目推荐 →</a>
+      </article>
+    </div>
+  </section>
+
+  <!-- 真心话大冒险 -->
+  <section class="section" id="truth">
+    <div class="sec-head">
+      <h2>真 心 话 · 大 冒 险</h2>
+      <p>点一下 · 命运说了算</p>
+    </div>
+
+    <div class="truth-panel">
+      <div class="truth-display" id="truthDisplay">
+        <span class="truth-placeholder">点下方按钮，随机抽一道题</span>
+      </div>
+      <div class="truth-actions">
+        <button class="btn solid" id="drawTruth">抽 真 心 话</button>
+        <button class="btn ghost" id="drawDare">抽 大 冒 险</button>
+      </div>
+    </div>
+
+    <div class="truth-lists">
+      <div class="truth-col">
+        <h3 class="tc-title"><span class="dot dot-t"></span>真心话 · 推荐</h3>
+        <ul class="tc-list" id="truthList"></ul>
+      </div>
+      <div class="truth-col">
+        <h3 class="tc-title"><span class="dot dot-d"></span>大冒险 · 推荐</h3>
+        <ul class="tc-list" id="dareList"></ul>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <span>小鱼 · 工作日减脂 / 周末家宴</span>
+  <span>抖音号 370113481</span>
+</footer>
+
+<!-- 全屏滚动抽奖层 -->
+<div class="stage" id="stage" hidden>
+  <div class="stage-rays"></div>
+  <div class="stage-glow"></div>
+  <div class="stage-ring"></div>
+  <div class="stage-inner">
+    <p class="stage-eyebrow" id="stageEyebrow">正在抽取 · 家宴名额</p>
+    <div class="stage-name" id="stageName">—</div>
+    <p class="stage-sub" id="stageSub">本轮抽取 3 位 · 空格可跳过</p>
+  </div>
+  <button class="stage-skip" id="stageSkip">跳过动画</button>
+</div>
+
+<!-- 全屏中奖大屏 -->
+<div class="bigscreen" id="bigscreen" hidden>
+  <div class="bs-rays"></div>
+  <div class="bs-glow"></div>
+  <div class="bs-frame">
+    <div class="bs-head">
+      <span class="bs-eyebrow" id="bsPrize">家宴名额</span>
+      <span class="bs-date" id="bsDate">2026.11.03</span>
+    </div>
+
+    <div class="bs-body">
+      <p class="bs-label" id="bsLabel">恭 喜 中 奖</p>
+      <div class="bs-winners" id="bsWinners"></div>
+    </div>
+
+    <div class="bs-foot">
+      <span class="bs-brand">小鱼 · 工作日减脂 / 周末家宴</span>
+      <span class="bs-dyid">抖音号 370113481</span>
+    </div>
+  </div>
+
+  <div class="bs-ctrl" id="bsCtrl">
+    <button class="bs-btn" id="bsCopy">复制名单</button>
+    <button class="bs-btn" id="bsAgain">再抽一次</button>
+    <button class="bs-btn" id="bsClose">关闭</button>
+  </div>
+  <p class="bs-tip" id="bsTip">按 Esc 退出大屏</p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
