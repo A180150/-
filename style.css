@@ -1685,10 +1685,6 @@ body.dragon-run .bs-star{animation-play-state:paused}
     width:min(152vw,560px);
     top:24%;
   }
-  .bs-dragon{
-    width:min(140vw,520px);
-    top:-1%;
-  }
   /* 手机两列布局：列宽可压缩，避免长名字把卡片撑出屏幕 */
   .bs-winners.n2,.bs-winners.n3,.bs-winners.n4,.bs-winners.n5,.bs-winners.n6{
     grid-template-columns:repeat(2,minmax(0,1fr));
@@ -1704,36 +1700,11 @@ body.dragon-run .bs-star{animation-play-state:paused}
   .bs-stamp{width:22px;height:22px;font-size:9px;top:6px;right:6px}
 }
 
-/* 降级层：视频不可用时改用静态金龙图掠场 */
-.bs-dragon{
-  position:absolute;left:50%;top:-5%;
-  width:min(74vw,1000px);aspect-ratio:2172/1086;
-  z-index:0;pointer-events:none;
-  transform:translate(-140%,0) scale(.82);
-  opacity:0;
-  transition:opacity .45s ease,transform .6s cubic-bezier(.2,.86,.24,1);
-  mix-blend-mode:screen;
-  filter:drop-shadow(0 0 20px rgba(242,215,159,.6)) drop-shadow(0 10px 54px rgba(194,69,42,.4));
-}
-/* 视频不可用/未就绪时的兜底：静态金龙持续显形，而不是飞一下就消失 */
-.bs-dragon.show{opacity:.95;transform:translate(-50%,-6%) scale(1)}
-/* 视频接管时把静态金龙隐去；视频结束或失败再回来当底纹 */
-.bs-dragon.hide{opacity:0}
-.bs-dragon.fly{animation:dragonFly 2.5s cubic-bezier(.2,.86,.24,1) both}
-.bs-dragon img{display:block;width:100%;height:100%;object-fit:contain}
-@keyframes dragonFly{
-  0%{opacity:0;transform:translate(-140%,-16%) scale(.8) rotate(-7deg)}
-  14%{opacity:.9}
-  40%{opacity:1;transform:translate(-50%,-8%) scale(1.02) rotate(0deg)}
-  56%{transform:translate(-50%,-11%) scale(1.04) rotate(1deg)}
-  78%{opacity:.96;transform:translate(24%,-15%) scale(1.01) rotate(2deg)}
-  100%{opacity:0;transform:translate(132%,-24%) scale(.94) rotate(4deg)}
-}
+/* 静态金龙层已整层移除：开奖只认会动的视频龙，不再用一张静止的图冒充。
+   连带省掉一个常驻的大图层（2172×1086 + screen 混合 + 双层 drop-shadow）。 */
+
 /* 减少动效只关掉装饰动画；金龙视频是开奖内容本身，绝不能被这一条藏起来 ——
-   否则系统一开「减少动画」，开奖就只剩一张不动的龙图，等于整段仪式没了 */
-@media (prefers-reduced-motion:reduce){
-  .bs-dragon{animation:none!important}
-}
+   否则系统一开「减少动画」，开奖就整段没了 */
 
 /* ================= v5.3.1 金龙视频层压底 ================= */
 /* 金龙在卡片背后腾跃，卡片加深底色，保证名字对比度不受金龙亮部影响 */

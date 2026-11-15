@@ -804,35 +804,28 @@
   }
   var dragonWatch = 0;
 
-  /* 金龙视觉收尾：只负责解冻背景，不再把静态龙拉回来（避免播完又冒出一条） */
+  /* 金龙视觉收尾：只负责解冻背景 */
   function dragonStill() {
     document.body.classList.remove('dragon-run');
   }
 
-  /* 视频不可用或始终缓冲不出来时的兜底：
-     静态金龙持续显形 3.2 秒。这是最后一道保险，正常播放时永远不会走到这里 */
-  function dragonFallback() {
-    clearInterval(dragonWatch);
-    document.body.classList.remove('dragon-run');
-    var d = $('bsDragon');
-    if (!d) return;
-    d.classList.remove('hide');
-    d.classList.add('show');
-    clearTimeout(dragonTimer);
-    dragonTimer = setTimeout(function () { d.classList.remove('show'); }, 3200);
-  }
-
-  /* 卡死救援：一帧冻在屏幕中间比没有龙更难看，直接换静态金龙顶上 */
+  /* 卡住就重启这条片子，绝不拿静态图顶上 —— 只认会动的龙。
+     每条片子只重启一次，第二次仍卡就收尾，不让一张冻住的画面留在屏上 */
   function dragonStall(v) {
     clearInterval(dragonWatch);
     clearTimeout(dragonTimer);
     clearTimeout(dragonWait);
-    document.body.classList.remove('dragon-run');
-    if (v) {
+    if (!v) { document.body.classList.remove('dragon-run'); return; }
+    if (v.getAttribute('data-retry') === '1') {
       v.classList.remove('play');
       try { v.pause(); } catch (e) {}
+      document.body.classList.remove('dragon-run');
+      return;
     }
-    dragonFallback();
+    v.setAttribute('data-retry', '1');
+    try { v.currentTime = 0; } catch (e) {}
+    try { v.load(); } catch (e) {}
+    dragonStart(v);
   }
 
   function dragonStart(v) {
@@ -842,33 +835,18 @@
     v.classList.remove('lowfx');
     v.classList.add('play');
     document.body.classList.add('dragon-run');
-    var d = $('bsDragon');
-    if (d) { d.classList.remove('show'); d.classList.add('hide'); }
 
-    /* 解码体检：唯一的判死标准是「时间轴不往前走」。
-       不能拿 requestVideoFrameCallback 的帧数判死 —— 视频叠了 screen 混合时，
-       部分 Chromium 内核（含夸克）根本不给这个图层回调帧，帧数永远是 0，
-       一判就是「卡死」，开奖直接换成不动的静态龙图。 */
-    var frames = 0, winAt = performance.now(), lastT = -1, moveAt = winAt;
-    var hasRVFC = !!(v.requestVideoFrameCallback);
-    if (hasRVFC) {
-      (function count() {
-        v.requestVideoFrameCallback(function () { frames++; count(); });
-      })();
-    }
+    /* 卡顿判死只有一条：数据已经够了（readyState>=3）却还停在同一帧 450ms。
+       缓冲途中时间轴本来就不走，不能算卡；也绝不看帧数 */
+    var lastT = -1, moveAt = performance.now();
     dragonWatch = setInterval(function () {
       var now = performance.now();
       if (!v.classList.contains('play') || v.ended) { clearInterval(dragonWatch); return; }
       if (v.currentTime > lastT + 0.002) { lastT = v.currentTime; moveAt = now; }
-      if (now - moveAt > 450) { dragonStall(v); return; }
-      /* 帧数只用来提示降级，永远不用它判死 */
-      if (now - winAt >= 700) {
-        if (hasRVFC && frames > 0 && frames < 8) v.classList.add('lowfx');
-        frames = 0; winAt = now;
-      }
+      if (v.readyState >= 3 && now - moveAt > 450) { dragonStall(v); return; }
     }, 120);
 
-    /* 整条片子放完（约 5.4 秒）：停在最后一帧，让中奖卡压在龙头上，1.6 秒后再淡出 */
+    /* 整条片子放完（约 5 秒）：停在最后一帧，让中奖卡压在龙头上，1.6 秒后再淡出 */
     v.onended = function () {
       clearInterval(dragonWatch);
       clearTimeout(dragonTimer);
@@ -877,14 +855,8 @@
         dragonStill();
       }, 1600);
     };
-    /* 中途缓冲：给 600ms 机会，仍不出帧就当卡死处理 */
-    v.onwaiting = function () {
-      v.classList.add('lowfx');
-      clearTimeout(dragonTimer);
-      dragonTimer = setTimeout(function () {
-        if (v.readyState < 3) dragonStall(v);
-      }, 600);
-    };
+    /* 缓冲只做提示，不判死：等数据够了自然会继续往下走 */
+    v.onwaiting = function () { clearTimeout(dragonTimer); };
     v.onplaying = function () { v.classList.remove('lowfx'); };
 
     var pr = null;
@@ -897,31 +869,14 @@
     clearTimeout(dragonTimer);
     clearTimeout(dragonWait);
     clearInterval(dragonWatch);
-    /* 金龙是开奖内容本身，不是装饰：系统开了「减少动效」也照常播，
-       只有真的没有视频、或始终缓冲不出来，才退回静态金龙 */
-    if (!v) { dragonFallback(); return; }
+    /* 金龙是开奖内容本身，不是装饰：系统开了「减少动效」也照常播。
+       没有视频就什么都不做，不再拿静态图冒充 */
+    if (!v) return;
+    v.removeAttribute('data-retry');
     v.classList.remove('lowfx');
     v.classList.remove('play');
-    /* 就绪立刻开播；900ms 还出不来第一帧就直接上静态金龙，开奖不能空着 */
-    if (v.readyState >= 3) { dragonStart(v); return; }
-    var done = false;
-    function go() {
-      if (done) return;
-      done = true;
-      v.removeEventListener('canplay', go);
-      v.removeEventListener('canplaythrough', go);
-      clearTimeout(dragonWait);
-      dragonStart(v);
-    }
-    v.addEventListener('canplay', go);
-    v.addEventListener('canplaythrough', go);
-    dragonWait = setTimeout(function () {
-      if (done) return;
-      done = true;
-      v.removeEventListener('canplay', go);
-      v.removeEventListener('canplaythrough', go);
-      if (v.readyState >= 2) dragonStart(v); else dragonFallback();
-    }, 900);
+    /* 直接开播，由浏览器自己等缓冲：不再预设「多久出不来就降级」 */
+    dragonStart(v);
   }
 
   function stopDragon() {
@@ -934,12 +889,11 @@
       v.onended = null;
       v.onwaiting = null;
       v.onplaying = null;
+      v.removeAttribute('data-retry');
       v.classList.remove('play');
       v.classList.remove('lowfx');
       try { v.pause(); } catch (e) {}
     }
-    var d = $('bsDragon');
-    if (d) { d.classList.remove('fly'); d.classList.remove('show'); d.classList.remove('hide'); }
   }
 
   function seedStardust() {
