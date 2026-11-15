@@ -493,6 +493,8 @@
 
     $('bigscreen').hidden = false;
     document.body.style.overflow = 'hidden';
+    document.documentElement.classList.add('bs-open');
+    document.body.classList.add('bs-open');
     beginControls();
 
     /* 暗场蓄力：先压黑，龙破空的同时把屏幕重新点亮 */
@@ -528,6 +530,8 @@
   function closeBigScreen() {
     $('bigscreen').hidden = true;
     document.body.style.overflow = '';
+    document.documentElement.classList.remove('bs-open');
+    document.body.classList.remove('bs-open');
     stopControls();
     stopFx();
     stopDragon();
