@@ -308,6 +308,22 @@
     btn.disabled = rolling || pool.length === 0;
     btn.querySelector('span').textContent = rolling ? '抽 奖 中' : (pool.length === 0 ? '无 人' : '抽\u00A0\u00A0奖');
 
+    /* 首屏抽奖状态带 + 轮次同步 */
+    var roundLabel = records.length + 1;
+    var hxPrize = $('hxPrize');
+    if (hxPrize) {
+      var pv = $('prizeInput') ? $('prizeInput').value.trim() : '';
+      hxPrize.textContent = pv || '家宴名额';
+    }
+    var hxTotal = $('hxTotal');
+    if (hxTotal) hxTotal.textContent = people.length;
+    var hxPool = $('hxPool');
+    if (hxPool) hxPool.textContent = pool.length;
+    var hxRound = $('hxRound');
+    if (hxRound) hxRound.textContent = roundLabel;
+    var roundNo = $('roundNo');
+    if (roundNo) roundNo.textContent = roundLabel;
+
     saveStore();
   }
 
@@ -433,12 +449,16 @@
     $('bsPrize').textContent = prize;
     $('bsDate').textContent = fmtDate(Date.now());
     $('bsLabel').textContent = '恭 喜 中 奖 · ' + winners.length + ' 位';
+    var bsRoundEl = $('bsRound');
+    if (bsRoundEl) bsRoundEl.textContent = records.length || 1;
 
     var box = $('bsWinners');
     box.className = 'bs-winners n' + Math.min(6, winners.length);
     box.innerHTML = winners.map(function (p, i) {
-      return '<div class="bs-card" style="animation-delay:' + (0.18 + i * 0.16) + 's">' +
-        '<div class="bs-top"><span class="bs-order">NO.' + pad(i + 1) + '</span><span class="bs-seal">中 奖</span></div>' +
+      var d = 0.16 + i * 0.14;
+      return '<div class="bs-card" style="animation-delay:' + d + 's">' +
+        '<span class="bs-no">NO.' + pad(i + 1) + '</span>' +
+        '<span class="bs-stamp" style="animation-delay:' + (d + 0.62) + 's">中<br>奖</span>' +
         '<span class="bs-name">' + esc(displayName(p)) + '</span>' +
       '</div>';
     }).join('');
@@ -485,21 +505,23 @@
   window.addEventListener('resize', sizeCanvas);
 
   function confettiBurst() {
-    var colors = ['#e9c98f', '#f6e3bf', '#d8a55f', '#c07a37', '#a03f26', '#fff6e2', '#d4a857'];
+    var colors = ['#f2d79f', '#d9a862', '#fbeed0', '#c58f45', '#fff6e2', '#a8762e', '#e0704b'];
     var cx = cv.width * (0.25 + Math.random() * 0.5);
     var cy = cv.height * (0.18 + Math.random() * 0.34);
     for (var i = 0; i < 90; i++) {
       var ang = Math.random() * Math.PI * 2;
       var spd = 3 + Math.random() * 7;
+      var round = Math.random() < 0.28;
       bits.push({
         x: cx, y: cy,
-        w: Math.random() * 6 + 3,
-        h: Math.random() * 10 + 4,
+        w: round ? Math.random() * 4 + 2 : Math.random() * 5 + 3,
+        h: round ? Math.random() * 4 + 2 : Math.random() * 11 + 5,
         vx: Math.cos(ang) * spd,
         vy: Math.sin(ang) * spd - 4,
         rot: Math.random() * Math.PI,
         vr: (Math.random() - 0.5) * 0.25,
         a: 1,
+        round: round,
         life: 90 + Math.random() * 70,
         c: colors[Math.floor(Math.random() * colors.length)]
       });
@@ -507,17 +529,18 @@
   }
 
   function confettiRain() {
-    var colors = ['#e9c98f', '#f6e3bf', '#d8a55f', '#c07a37', '#a03f26'];
+    var colors = ['#f2d79f', '#d9a862', '#fbeed0', '#c58f45', '#e0704b'];
     bits.push({
       x: Math.random() * cv.width,
       y: -20 - Math.random() * 100,
-      w: Math.random() * 5 + 3,
+      w: Math.random() * 4 + 2,
       h: Math.random() * 8 + 4,
       vx: (Math.random() - 0.5) * 1.2,
       vy: Math.random() * 2 + 1.6,
       rot: Math.random() * Math.PI,
       vr: (Math.random() - 0.5) * 0.08,
       a: 1,
+      round: Math.random() < 0.3,
       life: 300,
       c: colors[Math.floor(Math.random() * colors.length)]
     });
@@ -541,7 +564,13 @@
       ctx.translate(b.x, b.y);
       ctx.rotate(b.rot);
       ctx.fillStyle = b.c;
-      ctx.fillRect(-b.w / 2, -b.h / 2, b.w, b.h);
+      if (b.round) {
+        ctx.beginPath();
+        ctx.arc(0, 0, b.w / 2, 0, Math.PI * 2);
+        ctx.fill();
+      } else {
+        ctx.fillRect(-b.w / 2, -b.h / 2, b.w, b.h);
+      }
       ctx.restore();
     }
     requestAnimationFrame(loop);
@@ -755,6 +784,19 @@
     $('ctaDraw').onclick = $('toDraw').onclick = function () {
       $('drawSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
+    var hxDrawBtn = $('hxDraw');
+    if (hxDrawBtn) {
+      hxDrawBtn.onclick = function () {
+        $('drawSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      };
+    }
+    var prizeEl = $('prizeInput');
+    if (prizeEl) {
+      prizeEl.addEventListener('input', function () {
+        var hx = $('hxPrize');
+        if (hx) hx.textContent = prizeEl.value.trim() || '家宴名额';
+      });
+    }
 
     $('bsClose').onclick = closeBigScreen;
     $('bsAgain').onclick = function () {

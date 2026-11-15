@@ -2,7 +2,7 @@
    策略：Cache First（优先用缓存，没缓存再网络）
    网络资源：字体 / hero 图片 / 页面本身
 */
-const CACHE = 'xiaoyu-home-v1';
+const CACHE = 'xiaoyu-home-v4';
 const ASSETS = [
   './',
   './index.html',
@@ -32,8 +32,8 @@ self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
 
-  // Google Fonts：Stale While Revalidate（返回旧缓存，后台更新）
-  if (req.url.includes('fonts.googleapis.com') || req.url.includes('fonts.gstatic.com')) {
+  // 字体（miaoda 自托管镜像）：Stale While Revalidate（返回旧缓存，后台更新）
+  if (req.url.includes('miaoda.feishu.cn')) {
     e.respondWith(
       caches.open(CACHE).then((cache) =>
         cache.match(req).then((cached) => {
