@@ -169,6 +169,18 @@
         var s = line;
         s = s.replace(/^\s*\d+\s*[.、．]\s*/, '');
         s = s.replace(/^\s*\d+\s*[.、．]\s*/, '');
+        /* 群昵称本身可能就是一串标点（例如只有一个「.」），不能被下面的清洗吃掉 */
+        var dotHit = s.trim().match(/^[.。·•]{1,4}(?:[ \t]+(.+))?$/u);
+        if (dotHit) {
+          var dotNick = s.trim().split(/[ \t]+/)[0];
+          var dotNote = (dotHit[1] || '')
+            .replace(/（[^）]*）/g, ' ').replace(/\([^)]*\)/g, ' ')
+            .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu, ' ')
+            .replace(/[\u200B-\u200F\u202A-\u202E\uFEFF\u3164]/g, ' ')
+            .replace(/\s+/g, ' ').trim();
+          out.push({ nick: dotNick.slice(0, 24), note: dotNote.slice(0, 24) });
+          return;
+        }
         s = s.replace(/（[^）]*）/g, ' ').replace(/\([^)]*\)/g, ' ');
         s = s.replace(/只接\S*/g, ' ');
         s = s.replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{FE0F}\u{200D}]/gu, ' ');
@@ -184,7 +196,10 @@
       });
     } else {
       text.split(/[\n,，、;；\t]+/).forEach(function (x) {
-        var v = x.replace(/[.。]+$/, '').trim();
+        var t = x.trim();
+        if (!t) return;
+        if (/^[.。·•]{1,4}$/u.test(t)) { out.push({ nick: t.slice(0, 24), note: '' }); return; }
+        var v = t.replace(/[.。]+$/, '').trim();
         if (v) out.push({ nick: v.slice(0, 24), note: '' });
       });
     }
@@ -201,8 +216,12 @@
   }
 
   function displayName(p) {
-    if (p.note && p.nick !== p.note) return p.nick + '·' + p.note;
-    return p.nick;
+    if (p.note && p.nick !== p.note) {
+      /* 网名全是标点时只显示备注，避免出现「·小石」这种怪样子 */
+      if (/^[.。·•]{1,4}$/u.test(p.nick)) return p.note;
+      return p.nick + '·' + p.note;
+    }
+    return p.nick || p.note;
   }
 
   /* ---------------- 数字递增 ---------------- */
