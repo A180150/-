@@ -796,19 +796,29 @@
   var dragonTimer = 0;
   var dragonWait = 0;
 
-  /* 视频素材不可用时的降级：改用静态金龙图 + CSS 掠场 */
+  /* 静态金龙常驻做底纹；视频接管时隐去，视频结束或失败再回来，任何情况下都不会没有龙 */
+  function showDragonStill() {
+    var d = $('bsDragon');
+    if (d) d.classList.remove('hide');
+  }
+
+  /* 视频素材不可用时的降级：静态金龙留在原位并掠场 */
   function dragonFallback() {
     var d = $('bsDragon');
-    if (d) d.classList.add('fly');
+    if (!d) return;
+    d.classList.remove('hide');
+    d.classList.add('fly');
   }
 
   function dragonStart(v) {
     try { v.currentTime = 0; } catch (e) {}
     v.classList.add('play');
+    var d = $('bsDragon');
+    if (d) d.classList.add('hide');
     /* 播完自然淡出；5.4 秒兜底，防止 ended 未触发时定格挡住名字 */
     clearTimeout(dragonTimer);
-    dragonTimer = setTimeout(function () { v.classList.remove('play'); }, 5400);
-    v.onended = function () { v.classList.remove('play'); };
+    dragonTimer = setTimeout(function () { v.classList.remove('play'); showDragonStill(); }, 5400);
+    v.onended = function () { v.classList.remove('play'); showDragonStill(); };
     /* 只在播放途中卡顿才降级，首帧缓冲不算 */
     v.onwaiting = function () { if (v.currentTime > 0.6) v.classList.add('lowfx'); };
     var pr = null;
@@ -851,7 +861,7 @@
       try { v.pause(); } catch (e) {}
     }
     var d = $('bsDragon');
-    if (d) d.classList.remove('fly');
+    if (d) { d.classList.remove('fly'); d.classList.remove('hide'); }
   }
 
   function seedStardust() {

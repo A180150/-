@@ -1704,11 +1704,14 @@ a.hs-btn{display:flex;align-items:center;justify-content:center;text-align:cente
   position:absolute;left:50%;top:-5%;
   width:min(74vw,1000px);aspect-ratio:2172/1086;
   z-index:0;pointer-events:none;
-  transform:translate(-140%,0) scale(.82);
-  opacity:0;
+  transform:translate(-50%,0) scale(1);
+  opacity:.95;
+  transition:opacity .45s ease;
   mix-blend-mode:screen;
   filter:drop-shadow(0 0 20px rgba(242,215,159,.6)) drop-shadow(0 10px 54px rgba(194,69,42,.4));
 }
+/* 视频接管时把静态金龙隐去；视频结束或失败再回来当底纹 */
+.bs-dragon.hide{opacity:0}
 .bs-dragon.fly{animation:dragonFly 2.5s cubic-bezier(.2,.86,.24,1) both}
 .bs-dragon img{display:block;width:100%;height:100%;object-fit:contain}
 @keyframes dragonFly{
@@ -1720,7 +1723,7 @@ a.hs-btn{display:flex;align-items:center;justify-content:center;text-align:cente
   100%{opacity:0;transform:translate(132%,-24%) scale(.94) rotate(4deg)}
 }
 @media (prefers-reduced-motion:reduce){
-  .bs-dragon{display:none}
+  .bs-dragon{animation:none!important}
   .bs-dragon-video{display:none}
 }
 
