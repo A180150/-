@@ -1658,7 +1658,7 @@ a.hs-btn{display:flex;align-items:center;justify-content:center;text-align:cente
   position:absolute;left:50%;top:47%;
   width:min(88vw,1180px);aspect-ratio:16/9;
   transform:translate(-50%,-50%);
-  z-index:0;pointer-events:none;
+  z-index:1;pointer-events:none;
   opacity:0;transition:opacity .55s ease;
   mix-blend-mode:screen;
   filter:contrast(1.34) saturate(1.05) brightness(1.05);
@@ -1668,7 +1668,6 @@ a.hs-btn{display:flex;align-items:center;justify-content:center;text-align:cente
   mask-image:radial-gradient(ellipse 96% 92% at 50% 46%,#000 28%,rgba(0,0,0,.62) 58%,rgba(0,0,0,.2) 76%,transparent 88%),
     linear-gradient(180deg,#000 62%,rgba(0,0,0,.55) 84%,transparent 97%);
   mask-composite:intersect;
-}
 }
 .bs-dragon-video.play{opacity:1}
 /* 播放中若出现缓冲卡顿，自动去掉滤镜链，减少每帧合成开销 */
