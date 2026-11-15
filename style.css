@@ -1703,8 +1703,8 @@ a.hs-btn{display:flex;align-items:center;justify-content:center;text-align:cente
   position:absolute;left:50%;top:-5%;
   width:min(74vw,1000px);aspect-ratio:2172/1086;
   z-index:0;pointer-events:none;
-  transform:translate(-50%,0) scale(1);
-  opacity:.95;
+  transform:translate(-140%,0) scale(.82);
+  opacity:0;
   transition:opacity .45s ease;
   mix-blend-mode:screen;
   filter:drop-shadow(0 0 20px rgba(242,215,159,.6)) drop-shadow(0 10px 54px rgba(194,69,42,.4));
