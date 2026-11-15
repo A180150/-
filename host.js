@@ -492,6 +492,7 @@
     beginControls();
     seedStardust();
     dragonRush();
+    dragonPlay();
     if (fx) starBurst(fx.width * 0.5, fx.height * 0.5, 18);
     confettiBurst();
     winners.forEach(function (_, i) {
@@ -514,6 +515,7 @@
     document.body.style.overflow = '';
     stopControls();
     stopFx();
+    stopDragon();
     $('bsCtrl').classList.remove('show');
     $('bsTip').classList.remove('show');
   }
@@ -774,6 +776,45 @@
     }
   }
 
+  var dragonTimer = 0;
+
+  /* 视频素材不可用时的降级：改用静态金龙图 + CSS 掠场 */
+  function dragonFallback() {
+    var d = $('bsDragon');
+    if (d) d.classList.add('fly');
+  }
+
+  function dragonPlay() {
+    var v = $('bsDragonVideo');
+    clearTimeout(dragonTimer);
+    if (!v || reduceMotion()) return;
+    try { v.currentTime = 0; } catch (e) {}
+    v.classList.add('play');
+    /* 播完自然淡出；5.2 秒兜底，防止 ended 未触发时定格挡住名字 */
+    dragonTimer = setTimeout(function () { v.classList.remove('play'); }, 5200);
+    v.onended = function () { v.classList.remove('play'); };
+    var pr = null;
+    try { pr = v.play(); } catch (e) { dragonFallback(); }
+    if (pr && pr.catch) {
+      pr.catch(function () {
+        clearTimeout(dragonTimer);
+        v.classList.remove('play');
+        dragonFallback();
+      });
+    }
+  }
+
+  function stopDragon() {
+    clearTimeout(dragonTimer);
+    var v = $('bsDragonVideo');
+    if (v) {
+      v.classList.remove('play');
+      try { v.pause(); } catch (e) {}
+    }
+    var d = $('bsDragon');
+    if (d) d.classList.remove('fly');
+  }
+
   function seedStardust() {
     var el = $('bsStardust');
     if (!el || el.childElementCount) return;
@@ -883,6 +924,17 @@
 
     $('bigscreen').addEventListener('mousemove', beginControls);
     $('bigscreen').addEventListener('touchstart', beginControls, { passive: true });
+
+    /* 桌面端空闲预载金龙视频，保证开奖第一帧就有龙；手机端不预载，省流量 */
+    if (window.innerWidth > 900) {
+      setTimeout(function () {
+        var v = $('bsDragonVideo');
+        if (v && v.preload === 'none') {
+          v.preload = 'auto';
+          try { v.load(); } catch (e) {}
+        }
+      }, 2400);
+    }
 
     document.addEventListener('keydown', function (e) {
       if (!$('bigscreen').hidden) {

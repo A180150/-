@@ -1655,16 +1655,35 @@ a.hs-btn{display:flex;align-items:center;justify-content:center;text-align:cente
 }
 
 /* ================= v5.3 金龙掠场 ================= */
+/* 金龙视频层：黑底经 screen 混合融入金黑背景，压在卡片之下（龙在卡片背后腾跃） */
+.bs-dragon-video{
+  position:absolute;left:50%;top:47%;
+  width:min(88vw,1180px);aspect-ratio:16/9;
+  transform:translate(-50%,-50%);
+  z-index:0;pointer-events:none;
+  opacity:0;transition:opacity .55s ease;
+  mix-blend-mode:screen;
+  filter:contrast(1.34) saturate(1.05) brightness(1) drop-shadow(0 0 18px rgba(242,215,159,.45));
+  -webkit-mask-image:radial-gradient(ellipse 96% 92% at 50% 46%,#000 28%,rgba(0,0,0,.62) 58%,rgba(0,0,0,.2) 76%,transparent 88%),
+    linear-gradient(180deg,#000 62%,rgba(0,0,0,.55) 84%,transparent 97%);
+  -webkit-mask-composite:source-in;
+  mask-image:radial-gradient(ellipse 96% 92% at 50% 46%,#000 28%,rgba(0,0,0,.62) 58%,rgba(0,0,0,.2) 76%,transparent 88%),
+    linear-gradient(180deg,#000 62%,rgba(0,0,0,.55) 84%,transparent 97%);
+  mask-composite:intersect;
+}
+.bs-dragon-video.play{opacity:1}
+
+/* 降级层：视频不可用时改用静态金龙图掠场 */
 .bs-dragon{
   position:absolute;left:50%;top:-5%;
   width:min(74vw,1000px);aspect-ratio:2172/1086;
-  z-index:3;pointer-events:none;
+  z-index:0;pointer-events:none;
   transform:translate(-140%,0) scale(.82);
   opacity:0;
   mix-blend-mode:screen;
   filter:drop-shadow(0 0 20px rgba(242,215,159,.6)) drop-shadow(0 10px 54px rgba(194,69,42,.4));
-  animation:dragonFly 2.5s cubic-bezier(.2,.86,.24,1) both;
 }
+.bs-dragon.fly{animation:dragonFly 2.5s cubic-bezier(.2,.86,.24,1) both}
 .bs-dragon img{display:block;width:100%;height:100%;object-fit:contain}
 @keyframes dragonFly{
   0%{opacity:0;transform:translate(-140%,-16%) scale(.8) rotate(-7deg)}
@@ -1676,4 +1695,15 @@ a.hs-btn{display:flex;align-items:center;justify-content:center;text-align:cente
 }
 @media (prefers-reduced-motion:reduce){
   .bs-dragon{display:none}
+  .bs-dragon-video{display:none}
 }
+
+/* ================= v5.3.1 金龙视频层压底 ================= */
+/* 金龙在卡片背后腾跃，卡片加深底色，保证名字对比度不受金龙亮部影响 */
+.bs-card{
+  background:
+    linear-gradient(168deg,rgba(217,168,98,.13),rgba(140,47,26,.08) 55%,rgba(255,248,232,.025)),
+    linear-gradient(160deg,rgba(26,17,10,.95),rgba(13,8,5,.975));
+}
+/* 奖项与提示文字加重描影，压住金龙亮部 */
+.bs-prize,.bs-label{text-shadow:0 2px 12px rgba(0,0,0,.9),0 0 30px rgba(0,0,0,.7)}
