@@ -1449,3 +1449,169 @@ a.hs-btn{display:flex;align-items:center;justify-content:center;text-align:cente
 @media (max-width:420px){
   .host-page .panel-left,.host-page .panel-right{padding:16px 14px}
 }
+
+/* ================= v5.2 开奖动画 · 电影级入场 ================= */
+/* 大屏亮起瞬间，暖光从正中炸开一层 */
+.bigscreen::before{
+  content:"";position:absolute;inset:-20%;pointer-events:none;z-index:0;
+  background:radial-gradient(circle at 50% 48%,
+    rgba(255,246,226,.42),rgba(217,168,98,.2) 28%,rgba(194,69,42,.08) 46%,transparent 66%);
+  animation:burstIn 1.5s cubic-bezier(.16,.9,.3,1) both;
+}
+@keyframes burstIn{
+  0%{opacity:.85;transform:scale(.46)}
+  40%{opacity:.4}
+  100%{opacity:0;transform:scale(1.3)}
+}
+
+/* 卡片：3D 翻入、落地回弹 */
+.bs-card{
+  animation:cardIn2 1s cubic-bezier(.16,1.02,.28,1) both;
+  animation-delay:var(--d,0s);
+  transform-style:preserve-3d;
+  will-change:transform,opacity,filter;
+  isolation:isolate;
+}
+@keyframes cardIn2{
+  0%{opacity:0;transform:perspective(1200px) translateY(70px) rotateX(32deg) scale(.88);filter:blur(16px)}
+  46%{opacity:1;filter:blur(1.5px)}
+  72%{transform:perspective(1200px) translateY(-5px) rotateX(-3deg) scale(1.015)}
+  100%{opacity:1;transform:perspective(1200px) translateY(0) rotateX(0) scale(1);filter:blur(0)}
+}
+/* 卡片内壁暖光，缓慢呼吸 */
+.bs-card::after{
+  content:"";position:absolute;inset:0;z-index:0;pointer-events:none;border-radius:inherit;
+  background:radial-gradient(120% 96% at 50% 0%,rgba(240,212,154,.16),rgba(217,168,98,.05) 52%,transparent 72%);
+  animation:cardHalo 3.8s ease-in-out infinite;
+  animation-delay:calc(var(--d,0s) + .55s);
+}
+@keyframes cardHalo{0%,100%{opacity:.45}50%{opacity:1}}
+/* 落位后一道键光横掠 */
+.bs-sheen{
+  position:absolute;inset:0;z-index:2;pointer-events:none;border-radius:inherit;
+  background-image:linear-gradient(104deg,
+    transparent 30%,rgba(255,248,232,.34) 45%,rgba(255,240,214,.6) 50%,
+    rgba(217,168,98,.34) 56%,transparent 72%);
+  background-size:250% 100%;background-position:-130% 0;background-repeat:no-repeat;
+  mix-blend-mode:screen;opacity:0;
+  animation:sheenSweep 1.6s cubic-bezier(.2,.8,.3,1) both;
+  animation-delay:calc(var(--d,0s) + .45s);
+}
+@keyframes sheenSweep{
+  0%{background-position:-130% 0;opacity:0}
+  10%{opacity:.85}
+  55%{opacity:.5}
+  100%{background-position:250% 0;opacity:0}
+}
+/* 名字：先亮起，再转入金箔流动 */
+.bs-name{
+  animation:namePop 1.05s cubic-bezier(.16,1.05,.3,1) both,nameFlow 6.4s ease-in-out infinite;
+  animation-delay:calc(var(--d,0s) + .24s),calc(var(--d,0s) + 1.35s);
+}
+@keyframes namePop{
+  0%{opacity:0;transform:scale(.88);filter:blur(9px)}
+  52%{opacity:1;filter:blur(0) drop-shadow(0 8px 40px rgba(255,240,214,.6))}
+  100%{opacity:1;transform:scale(1);filter:blur(0) drop-shadow(0 6px 34px rgba(217,168,98,.32))}
+}
+/* 印章：从高处砸下，落定回弹 */
+.bs-stamp{
+  animation:stampIn2 .52s cubic-bezier(.2,1.34,.3,1) both;
+  animation-delay:calc(var(--d,0s) + .58s);
+}
+@keyframes stampIn2{
+  0%{opacity:0;transform:rotate(-22deg) scale(3);filter:blur(10px)}
+  50%{opacity:1;transform:rotate(-3deg) scale(.88);filter:blur(0)}
+  74%{transform:rotate(-3deg) scale(1.07)}
+  100%{transform:rotate(-3deg) scale(1)}
+}
+/* 文字层级依次上浮 */
+.bs-prize{animation:riseIn .68s cubic-bezier(.16,1,.3,1) both;animation-delay:.06s}
+.bs-label{animation:riseIn .68s cubic-bezier(.16,1,.3,1) both;animation-delay:.16s}
+.bs-head{animation:riseIn .7s ease-out both;animation-delay:.02s}
+.bs-foot{animation:riseIn .8s ease-out both;animation-delay:.28s}
+@keyframes riseIn{
+  from{opacity:0;transform:translateY(12px);filter:blur(6px)}
+  to{opacity:1;transform:none;filter:blur(0)}
+}
+.bs-body{overflow-x:hidden}
+
+/* ================= v5.2 抽奖台质感 ================= */
+.host-page .panel{
+  background:
+    radial-gradient(120% 54% at 50% -8%,rgba(217,168,98,.1),transparent 60%),
+    linear-gradient(160deg,rgba(46,33,20,.95),rgba(30,21,13,.97));
+  box-shadow:
+    0 34px 92px rgba(0,0,0,.56),
+    inset 0 1px 0 rgba(240,212,154,.14),
+    inset 0 0 0 1px rgba(217,168,98,.06),
+    inset 0 -52px 120px rgba(12,7,4,.5);
+}
+.host-page .panel::before{
+  background:linear-gradient(90deg,
+    transparent,rgba(240,212,154,.7) 24%,rgba(217,168,98,.5) 50%,
+    rgba(240,212,154,.7) 76%,transparent);
+}
+.host-page .panel-right{border-left-color:rgba(240,212,154,.14)}
+.stat-item{
+  transition:background .3s,border-color .3s,box-shadow .3s;
+}
+.stat-item b{font-variant-numeric:tabular-nums;letter-spacing:.02em}
+.stat-item:hover{
+  background:rgba(217,168,98,.09);border-color:rgba(217,168,98,.34);
+  box-shadow:0 0 18px rgba(217,168,98,.14);
+}
+.chip{box-shadow:inset 0 1px 0 rgba(255,248,232,.06)}
+.chip.drawn{
+  opacity:.5;border-style:dashed;border-color:rgba(180,155,120,.24);
+  color:rgba(180,155,120,.8);background:rgba(255,255,255,.02);
+}
+
+/* ================= 新动效的减少动效兜底 ================= */
+@media (prefers-reduced-motion:reduce){
+  .bs-sheen,.bs-card::after,.bigscreen::before,.bs-stamp,.bs-prize,.bs-label,.bs-head,.bs-foot{
+    animation:none!important;opacity:1;
+  }
+  .bs-sheen,.bs-card::after,.bigscreen::before{opacity:0}
+  .bs-card{animation-duration:.001s!important;animation-delay:0s!important}
+  .bs-name{animation:nameFlow 6.4s ease-in-out infinite!important;animation-delay:0s!important}
+}
+
+/* ================= v5.2 层次与可读性 ================= */
+/* 背景再压一档，把面板衬出来 */
+.host-page{
+  background:
+    radial-gradient(820px 460px at 50% -8%,rgba(194,69,42,.17),transparent 62%),
+    radial-gradient(600px 380px at 88% 6%,rgba(217,168,98,.09),transparent 60%),
+    linear-gradient(180deg,#1e140c,#170f09 62%,#140d07);
+}
+/* 三列以上：名字稍收，两行不顶格 */
+.bs-winners.n3 .bs-name{font-size:clamp(20px,2.5vw,32px);line-height:1.26}
+.bs-winners.n4 .bs-name{font-size:clamp(17px,1.9vw,24px)}
+/* 提示文字提亮，别糊在暗底上 */
+.host-page .hint,
+.host-page .chips-tip,
+.host-page .empty{color:rgba(198,176,144,.76)}
+.host-page .rigged-hint{color:var(--ember-light)}
+/* 输入区：更深的底、更清的金边 */
+.host-page textarea#namesInput{
+  background:linear-gradient(180deg,rgba(11,7,4,.86),rgba(17,11,7,.72));
+  border-color:rgba(217,168,98,.22);
+  box-shadow:inset 0 1px 0 rgba(255,248,232,.05),inset 0 -26px 48px rgba(0,0,0,.34);
+}
+.host-page .field{
+  background:rgba(10,6,4,.74);
+  border-color:rgba(217,168,98,.2);
+}
+.host-page .stat-item b{color:var(--gold-light)}
+/* 抽奖钮禁用态不再发灰，保暗金底 */
+.draw-btn:disabled{filter:none;opacity:.64}
+/* 顶栏金线缓慢流动 */
+.host-top::after{
+  background:linear-gradient(90deg,transparent,rgba(240,212,154,.72) 32%,rgba(217,168,98,.5) 50%,rgba(240,212,154,.72) 68%,transparent);
+  background-size:220% 100%;
+  animation:topFlow 8.5s linear infinite;
+}
+@keyframes topFlow{from{background-position:-110% 0}to{background-position:110% 0}}
+@media (prefers-reduced-motion:reduce){
+  .host-top::after{animation:none!important;background-position:50% 0}
+}

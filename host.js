@@ -469,13 +469,21 @@
     if (bsRoundEl) bsRoundEl.textContent = records.length || 1;
 
     var box = $('bsWinners');
-    box.className = 'bs-winners n' + Math.min(6, winners.length);
+    var n = Math.min(6, winners.length);
+    box.className = 'bs-winners n' + n;
     box.innerHTML = winners.map(function (p, i) {
-      var d = 0.16 + i * 0.14;
-      return '<div class="bs-card" style="animation-delay:' + d + 's">' +
+      var d = (0.07 + i * 0.085).toFixed(3);
+      var dn = displayName(p);
+      var label = esc(dn);
+      /* 三列以上时在网名与备注之间的「·」处换行，两行各自完整，不硬断字 */
+      if (n >= 3 && dn.indexOf('·') > -1 && dn.length > 7) {
+        label = label.replace('·', '<br>');
+      }
+      return '<div class="bs-card" style="--d:' + d + 's">' +
         '<span class="bs-no">NO.' + pad(i + 1) + '</span>' +
-        '<span class="bs-stamp" style="animation-delay:' + (d + 0.62) + 's">中<br>奖</span>' +
-        '<span class="bs-name">' + esc(displayName(p)) + '</span>' +
+        '<span class="bs-stamp">中<br>奖</span>' +
+        '<span class="bs-name">' + label + '</span>' +
+        '<span class="bs-sheen" aria-hidden="true"></span>' +
         '</div>';
     }).join('');
 
@@ -484,7 +492,14 @@
     beginControls();
     confettiBurst();
     winners.forEach(function (_, i) {
-      setTimeout(confettiBurst, 720 + i * 300);
+      setTimeout(function () {
+        var el = box.children[i];
+        if (el && el.getBoundingClientRect) {
+          var r = el.getBoundingClientRect();
+          confettiBurst(r.left + r.width / 2, r.top + Math.min(r.height * 0.5, 220), 46);
+        }
+        if (soundOn) sfxTick();
+      }, 340 + i * 85);
     });
   }
 
@@ -521,12 +536,13 @@
   sizeCanvas();
   window.addEventListener('resize', sizeCanvas);
 
-  function confettiBurst() {
+  function confettiBurst(x, y, count) {
     if (!ctx) return;
     var colors = ['#f2d79f', '#d9a862', '#fbeed0', '#c58f45', '#fff6e2', '#a8762e', '#e0704b'];
-    var cx = cv.width * (0.25 + Math.random() * 0.5);
-    var cy = cv.height * (0.18 + Math.random() * 0.34);
-    for (var i = 0; i < 90; i++) {
+    var cx = (typeof x === 'number') ? x : cv.width * (0.25 + Math.random() * 0.5);
+    var cy = (typeof y === 'number') ? y : cv.height * (0.18 + Math.random() * 0.34);
+    var n = count || 90;
+    for (var i = 0; i < n; i++) {
       var ang = Math.random() * Math.PI * 2;
       var spd = 3 + Math.random() * 7;
       var round = Math.random() < 0.28;
