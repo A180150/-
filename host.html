@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="theme-color" content="#17100a" />
+<meta name="robots" content="noindex, nofollow, noarchive" />
+<title>抽奖台 · 小鱼</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='31' fill='%2317100a'/%3E%3Ccircle cx='32' cy='32' r='26' fill='none' stroke='%23c2452a' stroke-width='1.5'/%3E%3Ctext x='32' y='43' font-size='30' text-anchor='middle' fill='%23f2d79f' font-family='serif'%3E奖%3C/text%3E%3C/svg%3E" />
+<link rel="preconnect" href="https://miaoda.feishu.cn" crossorigin />
+<link href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="style.css" />
+</head>
+<body class="host-page">
+
+<div class="grain"></div>
+<canvas id="confetti"></canvas>
+
+<header class="host-top">
+  <div class="ht-left">
+    <span class="ht-mark">抽 奖 台</span>
+    <span class="ht-round">第 <b id="hostRound">1</b> 轮</span>
+  </div>
+  <div class="ht-right">
+    <span class="ht-prize"><i>本期</i><b id="hostPrize">家宴名额</b></span>
+    <span class="ht-pool"><i>待抽 / 总</i><b id="hostPool">0 / 0</b></span>
+    <a class="btn ghost small" href="./">返回首页</a>
+  </div>
+</header>
+
+<main class="host-main">
+
+  <div class="panel">
+    <div class="panel-left">
+      <div class="lbl-row">
+        <label class="lbl">参与名单</label>
+        <span class="admin-flag" id="adminFlag">主播管理态</span>
+        <div class="stats" id="stats">
+          <span class="stat-item"><b id="stTotal">0</b><i>已导入</i></span>
+          <span class="stat-item"><b id="stPool">0</b><i>待抽</i></span>
+          <span class="stat-item drawn-stat"><b id="stDrawn">0</b><i>已中奖</i></span>
+          <span class="stat-item rigged-stat"><b id="stRigged">0</b><i>内定</i></span>
+        </div>
+      </div>
+      <textarea id="namesInput" spellcheck="false" placeholder="每行一个名字，或直接粘贴微信接龙文本&#10;&#10;1. 独孤求败 于国辉&#10;2. 六条&#10;3. 小千主义"></textarea>
+      <div class="row">
+        <button class="btn solid small" id="applyNames">应用名单</button>
+        <button class="btn ghost small" id="demoNames">填入示例</button>
+        <button class="btn ghost small" id="clearNames">清空</button>
+        <button class="btn ghost small" id="resetDrawn">重置已中奖</button>
+        <button class="btn ghost small" id="clearRigged">清空内定</button>
+      </div>
+      <div class="chips" id="chips"></div>
+      <p class="rigged-hint" id="riggedHint" hidden>本轮将有 <b>0</b> 位内定必中 · 点击名单可取消</p>
+      <p class="chips-tip">点击名单上的人，标记「内定」本轮必中 · 观众与截图不显示</p>
+    </div>
+
+    <div class="panel-right">
+      <div class="round-tag"><span>第</span><b id="roundNo">1</b><span>轮</span></div>
+
+      <label class="lbl">奖品名称</label>
+      <input class="field" id="prizeInput" type="text" maxlength="16" value="家宴名额" />
+
+      <label class="lbl">本轮抽几人</label>
+      <input class="field" id="countInput" type="number" min="1" max="20" value="3" />
+
+      <div class="draw-wrap">
+        <button class="draw-btn" id="drawBtn"><span>抽&nbsp;&nbsp;奖</span></button>
+      </div>
+
+      <button class="sound-toggle" id="soundToggle" type="button"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path class="wv" d="M16 8.5a5 5 0 0 1 0 7M18.6 6a8.5 8.5 0 0 1 0 12"/></svg><span class="st-txt">音效 开</span></button>
+      <p class="hint">点击抽奖 · 空格开始 / 跳过 · 抽完自动弹中奖大屏</p>
+    </div>
+  </div>
+
+  <div class="records-wrap">
+    <div class="lbl-row">
+      <label class="lbl">往期开奖</label>
+      <span class="count" id="recordCount">0 轮</span>
+    </div>
+    <div class="records" id="records"></div>
+  </div>
+
+</main>
+
+<div class="stage" id="stage" hidden>
+  <div class="stage-rays"></div>
+  <div class="stage-halo"></div>
+  <div class="stage-glow"></div>
+  <div class="stage-ring"></div>
+  <div class="stage-ring r2"></div>
+  <div class="stage-inner">
+    <p class="stage-eyebrow" id="stageEyebrow">正在抽取 · 家宴名额</p>
+    <div class="stage-name" id="stageName">—</div>
+    <p class="stage-sub" id="stageSub">本轮抽取 3 位 · 空格可跳过</p>
+  </div>
+  <button class="stage-skip" id="stageSkip">跳过动画</button>
+</div>
+
+<div class="bigscreen" id="bigscreen" hidden>
+  <div class="bs-rays"></div>
+  <div class="bs-glow"></div>
+  <div class="bs-vignette"></div>
+  <div class="bs-frame">
+    <span class="bs-corner c1"></span><span class="bs-corner c2"></span>
+    <span class="bs-corner c3"></span><span class="bs-corner c4"></span>
+
+    <div class="bs-head">
+      <span class="bs-eyebrow">第 <b id="bsRound">1</b> 轮 · 开 奖 结 果</span>
+      <span class="bs-date" id="bsDate">2026.11.03</span>
+    </div>
+
+    <div class="bs-body">
+      <p class="bs-prize" id="bsPrize">家宴名额</p>
+      <p class="bs-label" id="bsLabel">恭 喜 中 奖 · 3 位</p>
+      <div class="bs-winners" id="bsWinners"></div>
+    </div>
+
+    <div class="bs-foot">
+      <span class="bs-brand">小鱼 · 工作日减脂 / 周末家宴</span>
+      <span class="bs-dyid">抖音号 370113481</span>
+    </div>
+  </div>
+
+  <div class="bs-ctrl" id="bsCtrl">
+    <button class="bs-btn" id="bsCopy">复制名单</button>
+    <button class="bs-btn" id="bsAgain">再抽一次</button>
+    <button class="bs-btn" id="bsClose">关闭</button>
+  </div>
+  <p class="bs-tip" id="bsTip">按 Esc 退出大屏</p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="host.js"></script>
+</body>
+</html>

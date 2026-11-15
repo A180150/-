@@ -2,7 +2,7 @@
    策略：Cache First（优先用缓存，没缓存再网络）
    网络资源：字体 / hero 图片 / 页面本身
 */
-const CACHE = 'xiaoyu-home-v4';
+const CACHE = 'xiaoyu-home-v5';
 const ASSETS = [
   './',
   './index.html',
@@ -31,6 +31,9 @@ self.addEventListener('activate', (e) => {
 self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
+
+  // 主播抽奖台不接管缓存，永远取网络最新版
+  if (/host\.(html|js)($|\?)/.test(req.url)) return;
 
   // 字体（miaoda 自托管镜像）：Stale While Revalidate（返回旧缓存，后台更新）
   if (req.url.includes('miaoda.feishu.cn')) {

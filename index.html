@@ -4,21 +4,21 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="theme-color" content="#17100a" />
-<title>小鱼 · 家宴抽奖系统 · 每周六</title>
+<title>小鱼 · 每周六家宴 · 抽粉丝来家里吃饭</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='31' fill='%2317100a'/%3E%3Ccircle cx='32' cy='32' r='26' fill='none' stroke='%23d9a862' stroke-width='1.5'/%3E%3Ctext x='32' y='43' font-size='30' text-anchor='middle' fill='%23e7c98f' font-family='serif'%3E鱼%3C/text%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://miaoda.feishu.cn" crossorigin />
 <link href="https://miaoda.feishu.cn/fonts/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600&display=swap" rel="stylesheet" />
 
 <!-- SEO -->
-<meta name="description" content="小鱼家宴直播抽奖系统。每周六晚，从接龙名单里抽几位粉丝来家里吃一桌家常菜，六菜起步，AA 菜钱。" />
-<meta name="keywords" content="小鱼,家宴,抽奖,直播抽奖,减脂,每周六,粉丝,AA,家常菜" />
+<meta name="description" content="小鱼每周六的家宴。从粉丝接龙名单里抽几位来家里吃一桌家常菜，六菜起步，AA 菜钱。" />
+<meta name="keywords" content="小鱼,家宴,每周六,减脂,粉丝,AA,家常菜,接龙" />
 <meta name="author" content="小鱼" />
 <meta name="robots" content="index, follow" />
 
 <!-- Open Graph / 分享预览 -->
 <meta property="og:type" content="website" />
-<meta property="og:title" content="小鱼 · 家宴抽奖系统" />
-<meta property="og:description" content="抽你来家里吃顿饭 · 每周六晚直播抽奖，六菜起步，AA 菜钱" />
+<meta property="og:title" content="小鱼 · 每周六家宴" />
+<meta property="og:description" content="抽你来家里吃顿饭 · 每周六，六菜起步，AA 菜钱" />
 <meta property="og:image" content="./assets/hero.jpg" />
 <meta property="og:image:width" content="801" />
 <meta property="og:image:height" content="1100" />
@@ -26,8 +26,8 @@
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="小鱼 · 家宴抽奖系统" />
-<meta name="twitter:description" content="抽你来家里吃顿饭 · 每周六晚直播抽奖" />
+<meta name="twitter:title" content="小鱼 · 每周六家宴" />
+<meta name="twitter:description" content="抽你来家里吃顿饭 · 每周六" />
 <meta name="twitter:image" content="./assets/hero.jpg" />
 
 <!-- PWA -->
@@ -42,7 +42,6 @@
 <div class="grain"></div>
 <div class="particles" id="particles"></div>
 <div class="scroll-progress" id="scrollProgress"></div>
-<canvas id="confetti"></canvas>
 
 <header class="nav">
   <div class="who">
@@ -53,22 +52,22 @@
     </div>
   </div>
   <div class="nav-right">
-    <span class="live-dot"><i></i>本期抽奖</span>
+    <span class="live-dot"><i></i>本期开饭</span>
     <span class="stat"><b>2731</b> 粉丝</span>
     <span class="stat"><b>2.7万</b> 获赞</span>
     <nav class="nav-links">
-      <a href="#drawSection">抽奖台</a>
       <a href="#notice">须知</a>
+      <a href="#about">厨房</a>
       <a href="#games">游戏</a>
       <a href="#truth">真心话</a>
     </nav>
-    <button class="btn ghost" id="toDraw">开始抽奖</button>
+    <a class="btn ghost" href="#join">参与接龙</a>
   </div>
 </header>
 
 <main>
 
-  <!-- 首屏：抽奖系统主视觉 -->
+  <!-- 首屏 -->
   <section class="hero">
     <div class="glow g1"></div>
     <div class="glow g2"></div>
@@ -93,7 +92,7 @@
         </div>
 
         <div class="hero-actions">
-          <button class="btn solid" id="ctaDraw">开 始 抽 奖</button>
+          <a class="btn solid" href="#join">加 微 信 进 群</a>
           <a class="link" href="#about">看看这个厨房</a>
         </div>
       </div>
@@ -109,14 +108,14 @@
       </div>
     </div>
 
-    <!-- 首屏抽奖状态带 -->
+    <!-- 首屏开饭进度带 -->
     <div class="hero-strip">
       <div class="hs-cell">
         <i>本期奖项</i>
         <b id="hxPrize">家宴名额</b>
       </div>
       <div class="hs-cell">
-        <i>参与名单</i>
+        <i>接龙名单</i>
         <b id="hxTotal">0</b><span>人</span>
       </div>
       <div class="hs-cell">
@@ -124,76 +123,17 @@
         <b id="hxPool">0</b><span>人</span>
       </div>
       <div class="hs-cell hs-round">
-        <i>当前轮次</i>
-        <b>第 <em id="hxRound">1</em> 轮</b>
+        <i>本周第</i>
+        <b><em id="hxRound">1</em> 场</b>
       </div>
-      <button class="hs-btn" id="hxDraw">进 入 抽 奖 台</button>
-    </div>
-  </section>
-
-  <!-- 抽奖控制台 -->
-  <section class="section" id="drawSection">
-    <div class="sec-head">
-      <h2><span class="sec-num">01</span>抽 奖 台</h2>
-      <p>主播操作 · 粉丝围观 · 抽完自动弹出中奖大屏</p>
-    </div>
-
-    <div class="panel">
-      <div class="panel-left">
-        <div class="lbl-row">
-          <label class="lbl">参与名单</label>
-          <span class="admin-flag" id="adminFlag">主播管理态</span>
-          <div class="stats" id="stats">
-            <span class="stat-item"><b id="stTotal">0</b><i>已导入</i></span>
-            <span class="stat-item"><b id="stPool">0</b><i>待抽</i></span>
-            <span class="stat-item drawn-stat"><b id="stDrawn">0</b><i>已中奖</i></span>
-            <span class="stat-item rigged-stat"><b id="stRigged">0</b><i>内定</i></span>
-          </div>
-        </div>
-        <textarea id="namesInput" spellcheck="false" placeholder="每行一个名字，或直接粘贴微信接龙文本&#10;&#10;1. 独孤求败 于国辉&#10;2. 六条&#10;3. 小千主义"></textarea>
-        <div class="row">
-          <button class="btn solid small" id="applyNames">应用名单</button>
-          <button class="btn ghost small" id="demoNames">填入示例</button>
-          <button class="btn ghost small" id="clearNames">清空</button>
-          <button class="btn ghost small" id="resetDrawn">重置已中奖</button>
-          <button class="btn ghost small" id="clearRigged">清空内定</button>
-        </div>
-        <div class="chips" id="chips"></div>
-        <p class="rigged-hint" id="riggedHint" hidden>本轮将有 <b>0</b> 位内定必中 · 点击名单可取消</p>
-        <p class="chips-tip">点击名单上的人，标记「内定」本轮必中 · 观众与截图不显示</p>
-      </div>
-
-      <div class="panel-right">
-        <div class="round-tag"><span>第</span><b id="roundNo">1</b><span>轮</span></div>
-
-        <label class="lbl">奖品名称</label>
-        <input class="field" id="prizeInput" type="text" maxlength="16" value="家宴名额" />
-
-        <label class="lbl">本轮抽几人</label>
-        <input class="field" id="countInput" type="number" min="1" max="20" value="3" />
-
-        <div class="draw-wrap">
-          <button class="draw-btn" id="drawBtn"><span>抽&nbsp;&nbsp;奖</span></button>
-        </div>
-
-        <button class="sound-toggle" id="soundToggle" type="button"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4z"/><path class="wv" d="M16 8.5a5 5 0 0 1 0 7M18.6 6a8.5 8.5 0 0 1 0 12"/></svg><span class="st-txt">音效 开</span></button>
-        <p class="hint">点击抽奖 · 空格开始 / 跳过 · 抽完自动弹出中奖大屏</p>
-      </div>
-    </div>
-
-    <div class="records-wrap">
-      <div class="lbl-row">
-        <label class="lbl">往期开奖</label>
-        <span class="count" id="recordCount">0 轮</span>
-      </div>
-      <div class="records" id="records"></div>
+      <a class="hs-btn" href="#join">加 微 信 · 进 群 接 龙</a>
     </div>
   </section>
 
   <!-- 当天须知 -->
   <section class="section" id="notice">
     <div class="sec-head">
-      <h2><span class="sec-num">02</span>当 天 须 知</h2>
+      <h2><span class="sec-num">01</span>当 天 须 知</h2>
       <p>来之前看一眼 · 开心赴约</p>
     </div>
 
@@ -248,10 +188,10 @@
     </div>
   </section>
 
-  <!-- 关于 / 粉丝视角 -->
+  <!-- 关于 / 这个厨房 -->
   <section class="section" id="about">
     <div class="sec-head">
-      <h2><span class="sec-num">03</span>这 个 厨 房</h2>
+      <h2><span class="sec-num">02</span>这 个 厨 房</h2>
       <p>工作日算热量，周末算人情</p>
     </div>
 
@@ -273,11 +213,12 @@
       </article>
     </div>
 
-    <div class="contact">
+    <div class="contact" id="join">
       <div class="contact-inner">
         <p class="kicker">想 吃 饭 · 先 成 为 粉 丝</p>
         <p class="contact-line">微信 <b>V15713243914</b></p>
-        <p class="contact-line muted">抖音号 370113481 · 每周六抽粉丝到家吃饭</p>
+        <p class="contact-line muted">加微信进群 · 每周六群里接龙，我按名单抽人到家里吃饭</p>
+        <p class="contact-line muted">抖音号 370113481</p>
       </div>
     </div>
   </section>
@@ -285,7 +226,7 @@
   <!-- 桌游 / 游戏推荐 -->
   <section class="section" id="games">
     <div class="sec-head">
-      <h2><span class="sec-num">04</span>饭 后 游 戏</h2>
+      <h2><span class="sec-num">03</span>饭 后 游 戏</h2>
       <p>吃饱了 · 玩点啥</p>
     </div>
 
@@ -393,7 +334,7 @@
   <!-- 真心话大冒险 -->
   <section class="section" id="truth">
     <div class="sec-head">
-      <h2><span class="sec-num">05</span>真 心 话 · 大 冒 险</h2>
+      <h2><span class="sec-num">04</span>真 心 话 · 大 冒 险</h2>
       <p>点一下 · 命运说了算</p>
     </div>
 
@@ -425,57 +366,6 @@
   <span>小鱼 · 工作日减脂 / 周末家宴</span>
   <span>抖音号 370113481</span>
 </footer>
-
-<!-- 全屏滚动抽奖层 -->
-<div class="stage" id="stage" hidden>
-  <div class="stage-rays"></div>
-  <div class="stage-halo"></div>
-  <div class="stage-glow"></div>
-  <div class="stage-ring"></div>
-  <div class="stage-ring r2"></div>
-  <div class="stage-inner">
-    <p class="stage-eyebrow" id="stageEyebrow">正在抽取 · 家宴名额</p>
-    <div class="stage-name" id="stageName">—</div>
-    <p class="stage-sub" id="stageSub">本轮抽取 3 位 · 空格可跳过</p>
-  </div>
-  <button class="stage-skip" id="stageSkip">跳过动画</button>
-</div>
-
-<!-- 全屏中奖大屏 -->
-<div class="bigscreen" id="bigscreen" hidden>
-  <div class="bs-rays"></div>
-  <div class="bs-glow"></div>
-  <div class="bs-vignette"></div>
-  <div class="bs-frame">
-    <span class="bs-corner c1"></span><span class="bs-corner c2"></span>
-    <span class="bs-corner c3"></span><span class="bs-corner c4"></span>
-
-    <div class="bs-head">
-      <span class="bs-eyebrow">第 <b id="bsRound">1</b> 轮 · 开 奖 结 果</span>
-      <span class="bs-date" id="bsDate">2026.11.03</span>
-    </div>
-
-    <div class="bs-body">
-      <p class="bs-prize" id="bsPrize">家宴名额</p>
-      <p class="bs-label" id="bsLabel">恭 喜 中 奖 · 3 位</p>
-      <div class="bs-winners" id="bsWinners"></div>
-    </div>
-
-    <div class="bs-foot">
-      <span class="bs-brand">小鱼 · 工作日减脂 / 周末家宴</span>
-      <span class="bs-dyid">抖音号 370113481</span>
-    </div>
-  </div>
-
-  <div class="bs-ctrl" id="bsCtrl">
-    <button class="bs-btn" id="bsCopy">复制名单</button>
-    <button class="bs-btn" id="bsAgain">再抽一次</button>
-    <button class="bs-btn" id="bsClose">关闭</button>
-  </div>
-  <p class="bs-tip" id="bsTip">按 Esc 退出大屏</p>
-</div>
-
-<div class="toast" id="toast"></div>
 
 <script>
   // 注册 Service Worker（HTTPS 或 localhost 才生效）
