@@ -1659,11 +1659,12 @@ a.hs-btn{display:flex;align-items:center;justify-content:center;text-align:cente
 .bs-dragon-video{
   position:absolute;left:50%;top:47%;
   width:min(88vw,1180px);aspect-ratio:16/9;
-  transform:translate(-50%,-50%);
+  transform:translate(-50%,-50%) translateZ(0);
   z-index:0;pointer-events:none;
   opacity:0;transition:opacity .55s ease;
+  backface-visibility:hidden;
   mix-blend-mode:screen;
-  filter:contrast(1.34) saturate(1.05) brightness(1) drop-shadow(0 0 18px rgba(242,215,159,.45));
+  filter:contrast(1.34) saturate(1.05);
   -webkit-mask-image:radial-gradient(ellipse 96% 92% at 50% 46%,#000 28%,rgba(0,0,0,.62) 58%,rgba(0,0,0,.2) 76%,transparent 88%),
     linear-gradient(180deg,#000 62%,rgba(0,0,0,.55) 84%,transparent 97%);
   -webkit-mask-composite:source-in;
@@ -1672,6 +1673,13 @@ a.hs-btn{display:flex;align-items:center;justify-content:center;text-align:cente
   mask-composite:intersect;
 }
 .bs-dragon-video.play{opacity:1}
+/* 播放中若出现缓冲卡顿，自动降级为单层遮罩，减少每帧遮罩合成开销 */
+.bs-dragon-video.lowfx{
+  -webkit-mask-image:radial-gradient(ellipse 94% 90% at 50% 46%,#000 38%,rgba(0,0,0,.55) 66%,transparent 90%);
+  -webkit-mask-composite:source-over;
+  mask-image:radial-gradient(ellipse 94% 90% at 50% 46%,#000 38%,rgba(0,0,0,.55) 66%,transparent 90%);
+  mask-composite:source-over;
+}
 
 /* 降级层：视频不可用时改用静态金龙图掠场 */
 .bs-dragon{
