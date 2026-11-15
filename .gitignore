@@ -1,0 +1,6 @@
+# Trae 编辑器分享包（临时产物，不入库）
+.trae-html-share-packages/
+
+# 本地临时截图与探针页
+/_*.png
+/_*.html

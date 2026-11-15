@@ -15,37 +15,42 @@
 <meta name="author" content="小鱼" />
 <meta name="robots" content="index, follow" />
 
+<link rel="canonical" href="https://huaixiaohaiyp.cn/" />
+<link rel="preload" as="image" href="assets/hero.webp" type="image/webp" fetchpriority="high" />
+
 <!-- Open Graph / 分享预览 -->
 <meta property="og:type" content="website" />
 <meta property="og:title" content="小鱼 · 每周六家宴" />
 <meta property="og:description" content="抽你来家里吃顿饭 · 每周六，六菜起步，AA 菜钱" />
-<meta property="og:image" content="./assets/hero.jpg" />
+<meta property="og:url" content="https://huaixiaohaiyp.cn/" />
+<meta property="og:image" content="https://huaixiaohaiyp.cn/assets/hero.jpg" />
 <meta property="og:image:width" content="801" />
 <meta property="og:image:height" content="1100" />
+<meta property="og:image:alt" content="小鱼家宴的一桌家常菜" />
 <meta property="og:locale" content="zh_CN" />
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="小鱼 · 每周六家宴" />
 <meta name="twitter:description" content="抽你来家里吃顿饭 · 每周六" />
-<meta name="twitter:image" content="./assets/hero.jpg" />
+<meta name="twitter:image" content="https://huaixiaohaiyp.cn/assets/hero.jpg" />
 
 <!-- PWA -->
 <link rel="manifest" href="./manifest.json" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-<link rel="stylesheet" href="style.css?v=64" />
+<link rel="stylesheet" href="style.css?v=65" />
 </head>
 <body>
 
-<div class="grain"></div>
-<div class="particles" id="particles"></div>
-<div class="scroll-progress" id="scrollProgress"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="particles" id="particles" aria-hidden="true"></div>
+<div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
 
 <header class="nav">
   <div class="who">
-    <div class="avatar"><img src="assets/avatar.png" alt="小鱼" /></div>
+    <div class="avatar"><img src="assets/avatar.webp" alt="小鱼" width="192" height="192" decoding="async" /></div>
     <div class="who-text">
       <div class="nick">小鱼 <span>工作日减脂 · 周末家宴</span></div>
       <div class="dyid">抖音号 370113481</div>
@@ -55,7 +60,7 @@
     <span class="live-dot"><i></i>本期开饭</span>
     <span class="stat"><b>2731</b> 粉丝</span>
     <span class="stat"><b>2.7万</b> 获赞</span>
-    <nav class="nav-links">
+    <nav class="nav-links" aria-label="页面导航">
       <a href="#notice">须知</a>
       <a href="#about">厨房</a>
       <a href="#games">游戏</a>
@@ -101,7 +106,7 @@
         <div class="hv-frame">
           <span class="hv-steam s1"></span>
           <span class="hv-steam s2"></span>
-          <img src="assets/hero.jpg" alt="一桌热气腾腾的家常菜" loading="eager" decoding="async" />
+          <img src="assets/hero.webp" alt="一桌热气腾腾的家常菜" width="801" height="1100" loading="eager" decoding="async" fetchpriority="high" />
           <span class="hv-badge b1">六 菜 起 步</span>
           <span class="hv-badge b2">AA 菜 钱</span>
         </div>
@@ -339,12 +344,12 @@
     </div>
 
     <div class="truth-panel">
-      <div class="truth-display" id="truthDisplay">
+      <div class="truth-display" id="truthDisplay" role="status" aria-live="polite" aria-atomic="true">
         <span class="truth-placeholder">点下方按钮，随机抽一道题</span>
       </div>
       <div class="truth-actions">
-        <button class="btn solid" id="drawTruth">抽 真 心 话</button>
-        <button class="btn ghost" id="drawDare">抽 大 冒 险</button>
+        <button class="btn solid" id="drawTruth" type="button">抽 真 心 话</button>
+        <button class="btn ghost" id="drawDare" type="button">抽 大 冒 险</button>
       </div>
     </div>
 
@@ -375,6 +380,6 @@
     });
   }
 </script>
-<script src="app.js?v=64"></script>
+<script src="app.js?v=65"></script>
 </body>
 </html>

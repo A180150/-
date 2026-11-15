@@ -127,13 +127,16 @@
 
   /* ---------------- 启动 ---------------- */
   document.addEventListener('DOMContentLoaded', function () {
+    var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     renderStrip();
     bindHostEntry();
 
     /* 1. 滚动入场动画 */
     var revealEls = document.querySelectorAll('.section, .notice-card, .game-card, .card, .truth-col');
     revealEls.forEach(function (el) { el.classList.add('reveal'); });
-    if ('IntersectionObserver' in window) {
+    if (reduceMotion) {
+      revealEls.forEach(function (el) { el.classList.add('in'); });
+    } else if ('IntersectionObserver' in window) {
       var io = new IntersectionObserver(function (entries) {
         entries.forEach(function (en) {
           if (en.isIntersecting) {
@@ -149,7 +152,7 @@
 
     /* 2. Hero 鼠标视差 */
     var hero = document.querySelector('.hero');
-    if (hero && window.matchMedia('(hover: hover)').matches) {
+    if (hero && !reduceMotion && window.matchMedia('(hover: hover)').matches) {
       var heroGlows = hero.querySelectorAll('.glow');
       var heroParallax = [hero.querySelector('.title'), hero.querySelector('.kicker'), hero.querySelector('.lede')].filter(Boolean);
       hero.addEventListener('mousemove', function (e) {
@@ -173,7 +176,7 @@
 
     /* 3. 卡片 3D 倾斜 */
     var tiltCards = document.querySelectorAll('.notice-card, .game-card, .card');
-    if (window.matchMedia('(hover: hover)').matches) {
+    if (!reduceMotion && window.matchMedia('(hover: hover)').matches) {
       tiltCards.forEach(function (card) {
         card.addEventListener('mousemove', function (e) {
           var r = card.getBoundingClientRect();
@@ -190,6 +193,10 @@
     /* 4. 数字递增动画 */
     function animateNumber(el, target, duration, suffix) {
       suffix = suffix || '';
+      if (reduceMotion) {
+        el.textContent = (target >= 100 ? Math.floor(target) : target.toFixed(1)) + suffix;
+        return;
+      }
       var startTime = null;
       function step(ts) {
         if (!startTime) startTime = ts;
@@ -216,7 +223,7 @@
 
     /* 5. 背景浮动光点 */
     var particlesBox = $('particles');
-    if (particlesBox) {
+    if (particlesBox && !reduceMotion) {
       for (var i = 0; i < 14; i++) {
         var p = document.createElement('div');
         p.className = 'particle';
@@ -237,8 +244,9 @@
     if (progressBar) {
       var updateProgress = function () {
         var h = document.documentElement;
-        var sc = h.scrollTop / (h.scrollHeight - h.clientHeight);
-        progressBar.style.width = (sc * 100) + '%';
+        var maxScroll = h.scrollHeight - h.clientHeight;
+        var sc = maxScroll > 0 ? h.scrollTop / maxScroll : 0;
+        progressBar.style.width = (Math.min(Math.max(sc, 0), 1) * 100) + '%';
       };
       window.addEventListener('scroll', updateProgress, { passive: true });
       updateProgress();
@@ -247,6 +255,7 @@
     /* 7. 按钮波纹 */
     document.querySelectorAll('.btn, .hs-btn').forEach(function (btn) {
       btn.addEventListener('click', function (e) {
+        if (reduceMotion) return;
         var r = btn.getBoundingClientRect();
         var ripple = document.createElement('span');
         ripple.className = 'ripple';

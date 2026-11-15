@@ -1,17 +1,18 @@
 /* Service Worker — 小鱼家宴
-   策略：Cache First（优先用缓存，没缓存再网络）
+   策略：页面 Network First，静态资源 Cache First
    网络资源：字体 / hero 图片 / 页面本身
 */
-const CACHE = 'xiaoyu-home-v9';
+const CACHE = 'xiaoyu-home-v10';
 const ASSETS = [
   './',
   './index.html',
-  './style.css',
-  './app.js',
+  './style.css?v=65',
+  './app.js?v=65',
   './manifest.json',
   './robots.txt',
   './404.html',
-  './assets/hero.jpg'
+  './assets/hero.webp',
+  './assets/avatar.webp'
 ];
 
 self.addEventListener('install', (e) => {
@@ -34,6 +35,20 @@ self.addEventListener('fetch', (e) => {
 
   // 主播抽奖台不接管缓存，永远取网络最新版
   if (/host\.(html|js)($|\?)/.test(req.url)) return;
+
+  // 页面优先取最新版，断网时回退到缓存
+  if (req.mode === 'navigate') {
+    e.respondWith(
+      fetch(req).then((resp) => {
+        if (resp && resp.status === 200) {
+          const clone = resp.clone();
+          caches.open(CACHE).then((cache) => cache.put(req, clone));
+        }
+        return resp;
+      }).catch(() => caches.match(req).then((cached) => cached || caches.match('./index.html')))
+    );
+    return;
+  }
 
   // 字体（miaoda 自托管镜像）：Stale While Revalidate（返回旧缓存，后台更新）
   if (req.url.includes('miaoda.feishu.cn')) {
