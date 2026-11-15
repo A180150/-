@@ -490,13 +490,19 @@
     $('bigscreen').hidden = false;
     document.body.style.overflow = 'hidden';
     beginControls();
+    seedStardust();
+    dragonRush();
+    if (fx) starBurst(fx.width * 0.5, fx.height * 0.5, 18);
     confettiBurst();
     winners.forEach(function (_, i) {
       setTimeout(function () {
         var el = box.children[i];
         if (el && el.getBoundingClientRect) {
           var r = el.getBoundingClientRect();
-          confettiBurst(r.left + r.width / 2, r.top + Math.min(r.height * 0.5, 220), 46);
+          var cx = r.left + r.width / 2;
+          var cy = r.top + Math.min(r.height * 0.5, 220);
+          confettiBurst(cx, cy, 46);
+          starBurst(cx, cy, 8);
         }
         if (soundOn) sfxTick();
       }, 340 + i * 85);
@@ -507,6 +513,7 @@
     $('bigscreen').hidden = true;
     document.body.style.overflow = '';
     stopControls();
+    stopFx();
     $('bsCtrl').classList.remove('show');
     $('bsTip').classList.remove('show');
   }
@@ -611,6 +618,174 @@
     }
     requestAnimationFrame(loop);
   })();
+
+  /* ---------------- 金龙 · 星芒特效层 ---------------- */
+  var fx = $('fxLayers');
+  var fctx = fx ? fx.getContext('2d') : null;
+  var fxRAF = 0;
+  var fxStars = [];
+
+  function sizeFx() {
+    if (!fx) return;
+    fx.width = window.innerWidth;
+    fx.height = window.innerHeight;
+  }
+  sizeFx();
+  window.addEventListener('resize', sizeFx);
+
+  function reduceMotion() {
+    return !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }
+
+  /* 一颗四尖星芒 */
+  function drawStar(g, x, y, r, rot, alpha) {
+    if (alpha <= 0) return;
+    g.save();
+    g.translate(x, y);
+    g.rotate(rot);
+    var grd = g.createRadialGradient(0, 0, 0, 0, 0, r * 2.6);
+    grd.addColorStop(0, 'rgba(255,252,242,' + (0.9 * alpha) + ')');
+    grd.addColorStop(0.34, 'rgba(242,215,159,' + (0.42 * alpha) + ')');
+    grd.addColorStop(1, 'rgba(217,168,98,0)');
+    g.fillStyle = grd;
+    g.beginPath();
+    g.arc(0, 0, r * 2.6, 0, Math.PI * 2);
+    g.fill();
+    g.strokeStyle = 'rgba(255,250,236,' + (0.85 * alpha) + ')';
+    g.lineWidth = 1.3;
+    g.beginPath();
+    g.moveTo(-r, 0); g.lineTo(r, 0);
+    g.moveTo(0, -r); g.lineTo(0, r);
+    g.stroke();
+    g.restore();
+  }
+
+  function starBurst(x, y, count) {
+    for (var i = 0; i < count; i++) {
+      var ang = Math.random() * Math.PI * 2;
+      var spd = 0.35 + Math.random() * 0.9;
+      fxStars.push({
+        x: x, y: y,
+        vx: Math.cos(ang) * spd * 90,
+        vy: Math.sin(ang) * spd * 90,
+        rot: Math.random() * Math.PI,
+        vr: (Math.random() - 0.5) * 3,
+        r: 5 + Math.random() * 9,
+        born: performance.now(),
+        life: 620 + Math.random() * 380
+      });
+    }
+  }
+
+  /* 金龙从左侧腾入、跨过全屏、自右侧离去 */
+  function dragonRush() {
+    if (!fctx || reduceMotion()) return;
+    cancelAnimationFrame(fxRAF);
+    fctx.clearRect(0, 0, fx.width, fx.height);
+
+    var W = fx.width, H = fx.height;
+    var DUR = 2600;
+    var t0 = performance.now();
+
+    var rings = [
+      { born: 90, r0: 70, r1: Math.max(W, H) * 0.95 },
+      { born: 420, r0: 40, r1: Math.max(W, H) * 0.62 }
+    ];
+    fxStars = [];
+
+    function path(t) {
+      var x = -0.2 * W + t * 1.4 * W;
+      var y = H * 0.6 - Math.sin(t * Math.PI * 1.06) * H * 0.27 + Math.sin(t * Math.PI * 4.4) * H * 0.04;
+      return { x: x, y: y };
+    }
+
+    function bodyPoint(t, k, el) {
+      var p = path(t);
+      var q = path(t + 0.004);
+      var dx = q.x - p.x, dy = q.y - p.y;
+      var len = Math.sqrt(dx * dx + dy * dy) || 1;
+      var nx = -dy / len, ny = dx / len;
+      var wob = Math.sin(t * 24 + k * 0.2 + el / 320) * (8 + k * 0.14);
+      return { x: p.x + nx * wob, y: p.y + ny * wob, nx: nx, ny: ny };
+    }
+
+    function frame(now) {
+      var el = now - t0;
+      fctx.clearRect(0, 0, W, H);
+      if (el > DUR) { fxRAF = 0; fctx.globalCompositeOperation = 'source-over'; return; }
+      fctx.globalCompositeOperation = 'lighter';
+      fctx.globalAlpha = 1;
+
+      /* 冲击光环 */
+      for (var r = 0; r < rings.length; r++) {
+        var p = (el - rings[r].born) / 950;
+        if (p <= 0 || p >= 1) continue;
+        var rad = rings[r].r0 + (rings[r].r1 - rings[r].r0) * (1 - Math.pow(1 - p, 3));
+        var cx = W * 0.5, cy = H * 0.5;
+        fctx.strokeStyle = 'rgba(242,215,159,1)';
+        fctx.globalAlpha = (1 - p) * 0.45;
+        fctx.lineWidth = 2.6 * (1 - p) + 0.5;
+        fctx.beginPath(); fctx.arc(cx, cy, rad, 0, Math.PI * 2); fctx.stroke();
+        fctx.globalAlpha = (1 - p) * 0.14;
+        fctx.lineWidth = 12 * (1 - p) + 2;
+        fctx.beginPath(); fctx.arc(cx, cy, rad * 0.94, 0, Math.PI * 2); fctx.stroke();
+      }
+      fctx.globalAlpha = 1;
+
+      /* 龙珠：中心金光，随龙掠过一起呼吸 */
+      if (el < 1900) {
+        var cA = el < 1500 ? 1 : (1900 - el) / 400;
+        var cx2 = W * 0.5, cy2 = H * 0.5;
+        var cp = 0.8 + 0.2 * Math.sin(el / 85);
+        var cg2 = fctx.createRadialGradient(cx2, cy2, 0, cx2, cy2, 190);
+        cg2.addColorStop(0, 'rgba(255,252,242,' + (0.5 * cp * cA) + ')');
+        cg2.addColorStop(0.32, 'rgba(242,215,159,' + (0.26 * cp * cA) + ')');
+        cg2.addColorStop(1, 'rgba(217,168,98,0)');
+        fctx.fillStyle = cg2;
+        fctx.beginPath(); fctx.arc(cx2, cy2, 190, 0, Math.PI * 2); fctx.fill();
+      }
+
+      /* 星芒迸射 */
+      var nowT = now;
+      for (var i = fxStars.length - 1; i >= 0; i--) {
+        var st = fxStars[i];
+        var age = nowT - st.born;
+        if (age > st.life) { fxStars.splice(i, 1); continue; }
+        var pr = age / st.life;
+        var px = st.x + st.vx * pr * 0.9;
+        var py = st.y + st.vy * pr * 0.9 + 40 * pr * pr;
+        fctx.globalAlpha = 1;
+        drawStar(fctx, px, py, st.r * (1 - pr * 0.55), st.rot + st.vr * pr, Math.max(0, 1 - pr));
+      }
+      fctx.globalAlpha = 1;
+
+      fxRAF = requestAnimationFrame(frame);
+    }
+    fxRAF = requestAnimationFrame(frame);
+  }
+
+  function stopFx() {
+    cancelAnimationFrame(fxRAF);
+    fxRAF = 0;
+    fxStars = [];
+    if (fctx) {
+      fctx.globalCompositeOperation = 'source-over';
+      fctx.clearRect(0, 0, fx.width, fx.height);
+    }
+  }
+
+  function seedStardust() {
+    var el = $('bsStardust');
+    if (!el || el.childElementCount) return;
+    var out = '';
+    for (var i = 0; i < 46; i++) {
+      var sz = (1 + Math.random() * 1.8).toFixed(1);
+      out += '<i style="left:' + (Math.random() * 100).toFixed(2) + '%;top:' +
+        (Math.random() * 100).toFixed(2) + '%;width:' + sz + 'px;height:' + sz +
+        'px;animation-delay:' + (Math.random() * 3.6).toFixed(2) + 's"></i>';
+    }
+    el.innerHTML = out;
+  }
 
   /* ---------------- 事件 ---------------- */
   document.addEventListener('DOMContentLoaded', function () {

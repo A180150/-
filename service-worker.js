@@ -2,7 +2,7 @@
    策略：Cache First（优先用缓存，没缓存再网络）
    网络资源：字体 / hero 图片 / 页面本身
 */
-const CACHE = 'xiaoyu-home-v7';
+const CACHE = 'xiaoyu-home-v8';
 const ASSETS = [
   './',
   './index.html',
