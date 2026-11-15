@@ -1729,9 +1729,10 @@ body.dragon-run .bs-star{animation-play-state:paused}
   78%{opacity:.96;transform:translate(24%,-15%) scale(1.01) rotate(2deg)}
   100%{opacity:0;transform:translate(132%,-24%) scale(.94) rotate(4deg)}
 }
+/* 减少动效只关掉装饰动画；金龙视频是开奖内容本身，绝不能被这一条藏起来 ——
+   否则系统一开「减少动画」，开奖就只剩一张不动的龙图，等于整段仪式没了 */
 @media (prefers-reduced-motion:reduce){
   .bs-dragon{animation:none!important}
-  .bs-dragon-video{display:none}
 }
 
 /* ================= v5.3.1 金龙视频层压底 ================= */

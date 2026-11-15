@@ -476,7 +476,7 @@
        龙在卡片背后继续腾到停，最后一帧停住当底纹，视觉上不会有「龙卡在半空」 */
     var STEP = { 1: 0.30, 2: 0.24, 3: 0.17, 4: 0.13, 5: 0.10, 6: 0.10 };
     var step = STEP[n] || 0.12;
-    var base = 3.35;
+    var base = 4.4;
     box.className = 'bs-winners n' + n;
     box.innerHTML = winners.map(function (p, i) {
       var d = (base + i * step).toFixed(3);
@@ -506,13 +506,13 @@
       dim.classList.add('on');
     }
     seedStardust();
-    /* 龙播放期间不走 canvas 特效、不落彩屑，全部等到卡片阶段再开始 */
-    rainT0 = performance.now() + 2900;
-    bset(dragonRush, 3000);
+    /* 龙先完整腾跃：前 4.4 秒画面里只有龙，canvas 光环、彩屑、卡片全部等它走完再上 */
+    rainT0 = performance.now() + 4200;
+    bset(dragonRush, 4200);
     bset(dragonPlay, 350);
-    bset(confettiBurst, 3350);
+    bset(confettiBurst, 4400);
     if (fx) {
-      bset(function () { starBurst(fx.width * 0.5, fx.height * 0.5, 12); }, 3350);
+      bset(function () { starBurst(fx.width * 0.5, fx.height * 0.5, 12); }, 4400);
     }
     /* 每张卡落定的瞬间补一次星屑与轻响，和砸落节奏对齐 */
     winners.forEach(function (_, i) {
@@ -809,8 +809,8 @@
     document.body.classList.remove('dragon-run');
   }
 
-  /* 视频不可用、未就绪或系统开了减少动效时的兜底：
-     静态金龙持续显形 3.2 秒，保证任何情况下开奖都一定有龙 */
+  /* 视频不可用或始终缓冲不出来时的兜底：
+     静态金龙持续显形 3.2 秒。这是最后一道保险，正常播放时永远不会走到这里 */
   function dragonFallback() {
     clearInterval(dragonWatch);
     document.body.classList.remove('dragon-run');
@@ -845,10 +845,13 @@
     var d = $('bsDragon');
     if (d) { d.classList.remove('show'); d.classList.add('hide'); }
 
-    /* 解码体检：只让真的在出帧的播放继续。0.7 秒内不足 8 帧（≈11fps），
-       或时间轴 450ms 不往前走，判定为卡住，立刻换静态金龙 */
+    /* 解码体检：唯一的判死标准是「时间轴不往前走」。
+       不能拿 requestVideoFrameCallback 的帧数判死 —— 视频叠了 screen 混合时，
+       部分 Chromium 内核（含夸克）根本不给这个图层回调帧，帧数永远是 0，
+       一判就是「卡死」，开奖直接换成不动的静态龙图。 */
     var frames = 0, winAt = performance.now(), lastT = -1, moveAt = winAt;
-    if (v.requestVideoFrameCallback) {
+    var hasRVFC = !!(v.requestVideoFrameCallback);
+    if (hasRVFC) {
       (function count() {
         v.requestVideoFrameCallback(function () { frames++; count(); });
       })();
@@ -858,9 +861,9 @@
       if (!v.classList.contains('play') || v.ended) { clearInterval(dragonWatch); return; }
       if (v.currentTime > lastT + 0.002) { lastT = v.currentTime; moveAt = now; }
       if (now - moveAt > 450) { dragonStall(v); return; }
+      /* 帧数只用来提示降级，永远不用它判死 */
       if (now - winAt >= 700) {
-        if (frames < 8) v.classList.add('lowfx');
-        if (frames < 4) { dragonStall(v); return; }
+        if (hasRVFC && frames > 0 && frames < 8) v.classList.add('lowfx');
         frames = 0; winAt = now;
       }
     }, 120);
@@ -894,7 +897,9 @@
     clearTimeout(dragonTimer);
     clearTimeout(dragonWait);
     clearInterval(dragonWatch);
-    if (!v || reduceMotion()) { dragonFallback(); return; }
+    /* 金龙是开奖内容本身，不是装饰：系统开了「减少动效」也照常播，
+       只有真的没有视频、或始终缓冲不出来，才退回静态金龙 */
+    if (!v) { dragonFallback(); return; }
     v.classList.remove('lowfx');
     v.classList.remove('play');
     /* 就绪立刻开播；900ms 还出不来第一帧就直接上静态金龙，开奖不能空着 */
@@ -1048,12 +1053,13 @@
     $('bigscreen').addEventListener('mousemove', beginControls);
     $('bigscreen').addEventListener('touchstart', beginControls, { passive: true });
 
-    /* 桌面端页面就绪即预载金龙视频；手机端 3 秒后也预载，避免开奖时才现下 */
+    /* 桌面端页面就绪即预载金龙视频；手机端 3 秒后也预载，避免开奖时才现下。
+       已经在缓冲中就不再调 load()，否则会把已有缓冲重置掉 */
     setTimeout(function () {
       var v = $('bsDragonVideo');
       if (!v) return;
-      v.preload = 'auto';
-      try { v.load(); } catch (e) {}
+      if (v.preload !== 'auto') v.preload = 'auto';
+      if (v.readyState === 0) { try { v.load(); } catch (e) {} }
     }, window.innerWidth > 900 ? 200 : 3000);
 
     document.addEventListener('keydown', function (e) {

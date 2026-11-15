@@ -2,11 +2,11 @@
    策略：页面 Network First，静态资源 Cache First
    网络资源：字体 / hero 图片 / 页面本身
 */
-const CACHE = 'xiaoyu-home-v14';
+const CACHE = 'xiaoyu-home-v15';
 const ASSETS = [
   './',
   './index.html',
-  './style.css?v=69',
+  './style.css?v=70',
   './app.js?v=65',
   './manifest.json',
   './robots.txt',
