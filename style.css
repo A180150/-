@@ -1709,10 +1709,12 @@ body.dragon-run .bs-stardust i{animation-play-state:paused}
   z-index:0;pointer-events:none;
   transform:translate(-140%,0) scale(.82);
   opacity:0;
-  transition:opacity .45s ease;
+  transition:opacity .45s ease,transform .6s cubic-bezier(.2,.86,.24,1);
   mix-blend-mode:screen;
   filter:drop-shadow(0 0 20px rgba(242,215,159,.6)) drop-shadow(0 10px 54px rgba(194,69,42,.4));
 }
+/* 视频不可用/未就绪时的兜底：静态金龙持续显形，而不是飞一下就消失 */
+.bs-dragon.show{opacity:.95;transform:translate(-50%,-6%) scale(1)}
 /* 视频接管时把静态金龙隐去；视频结束或失败再回来当底纹 */
 .bs-dragon.hide{opacity:0}
 .bs-dragon.fly{animation:dragonFly 2.5s cubic-bezier(.2,.86,.24,1) both}

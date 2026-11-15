@@ -470,10 +470,11 @@
 
     var box = $('bsWinners');
     var n = Math.min(6, winners.length);
-    /* 节奏跟人数联动：1 人时慢而重，5 人以上快而密；0.92 秒留给暗场与龙破空 */
+    /* 节奏跟人数联动：1 人时慢而重，5 人以上快而密。
+       前 3.35 秒只留给金龙：龙先腾跃、再落卡片，避免视频解码与卡片动画抢同一帧 */
     var STEP = { 1: 0.30, 2: 0.24, 3: 0.17, 4: 0.13, 5: 0.10, 6: 0.10 };
     var step = STEP[n] || 0.12;
-    var base = 0.92;
+    var base = 3.35;
     box.className = 'bs-winners n' + n;
     box.innerHTML = winners.map(function (p, i) {
       var d = (base + i * step).toFixed(3);
@@ -503,12 +504,13 @@
       dim.classList.add('on');
     }
     seedStardust();
-    rainT0 = performance.now();
-    setTimeout(dragonRush, 320);
+    /* 龙播放期间不走 canvas 特效、不落彩屑，全部等到卡片阶段再开始 */
+    rainT0 = performance.now() + 2900;
+    setTimeout(dragonRush, 3000);
     setTimeout(dragonPlay, 350);
-    setTimeout(confettiBurst, 300);
+    setTimeout(confettiBurst, 3350);
     if (fx) {
-      setTimeout(function () { starBurst(fx.width * 0.5, fx.height * 0.5, 12); }, 620);
+      setTimeout(function () { starBurst(fx.width * 0.5, fx.height * 0.5, 12); }, 3350);
     }
     /* 每张卡落定的瞬间补一次星屑与轻响，和砸落节奏对齐 */
     winners.forEach(function (_, i) {
@@ -615,7 +617,7 @@
     if (!ctx) return;
     if (!bsEl) bsEl = $('bigscreen');
     var bigOpen = bsEl && !bsEl.hidden;
-    if (bigOpen && performance.now() - rainT0 < 3600 && Math.random() < 0.22) confettiRain();
+    if (bigOpen && performance.now() >= rainT0 && performance.now() - rainT0 < 3600 && Math.random() < 0.22) confettiRain();
     if (bits.length) {
       ctx.clearRect(0, 0, cv.width, cv.height);
       for (var i = bits.length - 1; i >= 0; i--) {
@@ -789,20 +791,21 @@
   var dragonTimer = 0;
   var dragonWait = 0;
 
-  /* 静态金龙常驻做底纹；视频接管时隐去，视频结束或失败再回来，任何情况下都不会没有龙 */
+  /* 金龙视觉收尾：只负责解冻背景，不再把静态龙拉回来（避免播完又冒出一条） */
   function showDragonStill() {
-    var d = $('bsDragon');
-    if (d) d.classList.remove('hide');
     document.body.classList.remove('dragon-run');
   }
 
-  /* 视频素材不可用时的降级：静态金龙留在原位并掠场 */
+  /* 视频不可用、未就绪或系统开了减少动效时的兜底：
+     静态金龙持续显形 3.2 秒，与视频等长，保证任何情况下开奖都一定有龙 */
   function dragonFallback() {
     document.body.classList.remove('dragon-run');
     var d = $('bsDragon');
     if (!d) return;
     d.classList.remove('hide');
-    d.classList.add('fly');
+    d.classList.add('show');
+    clearTimeout(dragonTimer);
+    dragonTimer = setTimeout(function () { d.classList.remove('show'); }, 3200);
   }
 
   function dragonStart(v) {
@@ -813,12 +816,16 @@
     if (cores <= 4) v.classList.add('lowfx');
     document.body.classList.add('dragon-run');
     var d = $('bsDragon');
-    if (d) d.classList.add('hide');
-    /* 播完自然淡出；5.4 秒兜底，防止 ended 未触发时定格挡住名字 */
+    if (d) { d.classList.remove('show'); d.classList.add('hide'); }
+    /* 龙只播前 3.2 秒：随后淡出、让位给卡片，避免视频与卡片动画同帧竞争 */
     clearTimeout(dragonTimer);
-    dragonTimer = setTimeout(function () { v.classList.remove('play'); showDragonStill(); }, 5400);
+    dragonTimer = setTimeout(function () {
+      v.classList.remove('play');
+      try { v.pause(); } catch (e) {}
+      showDragonStill();
+    }, 3200);
     v.onended = function () { v.classList.remove('play'); showDragonStill(); };
-    /* 只在播放途中卡顿才降级，首帧缓冲不算 */
+    /* 播放途中缓冲就卸掉遮罩与滤镜；若一直出不来画面，直接切静态金龙兜底 */
     v.onwaiting = function () { if (v.currentTime > 0.6) v.classList.add('lowfx'); };
     var pr = null;
     try { pr = v.play(); } catch (e) { v.classList.remove('play'); dragonFallback(); return; }
@@ -835,12 +842,10 @@
     var v = $('bsDragonVideo');
     clearTimeout(dragonTimer);
     clearTimeout(dragonWait);
-    if (!v || reduceMotion()) return;
+    if (!v || reduceMotion()) { dragonFallback(); return; }
     v.classList.remove('lowfx');
     v.classList.remove('play');
-    /* 缓冲就绪后才显示并播放，避免先冒出黑帧、看起来像龙没出现
-       手机网络慢，等待窗口收紧到 0.75 秒，达不到就切静态金龙，保证一定有画面 */
-    /* 桌面等 1.5 秒，手机等 0.75 秒；达不到就切静态金龙，保证一定有画面 */
+    /* 缓冲就绪后才显示并播放，避免先冒出黑帧；等不到就切静态金龙，保证一定有龙 */
     var tries = window.innerWidth > 900 ? 12 : 6;
     (function waitReady() {
       if (v.readyState >= 3) { dragonStart(v); return; }
@@ -861,7 +866,7 @@
       try { v.pause(); } catch (e) {}
     }
     var d = $('bsDragon');
-    if (d) { d.classList.remove('fly'); d.classList.remove('hide'); }
+    if (d) { d.classList.remove('fly'); d.classList.remove('show'); d.classList.remove('hide'); }
   }
 
   function seedStardust() {
