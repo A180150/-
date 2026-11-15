@@ -461,6 +461,7 @@
 
   /* ---------------- 中奖大屏 ---------------- */
   function showBigScreen(winners, prize) {
+    clearAllBigTimers();
     sfxWin();
     $('bsPrize').textContent = prize;
     $('bsDate').textContent = fmtDate(Date.now());
@@ -471,7 +472,8 @@
     var box = $('bsWinners');
     var n = Math.min(6, winners.length);
     /* 节奏跟人数联动：1 人时慢而重，5 人以上快而密。
-       前 3.35 秒只留给金龙：龙先腾跃、再落卡片，避免视频解码与卡片动画抢同一帧 */
+       金龙整条片子（约 5 秒）一次放完，不再中途掐断——卡片 3.35 秒后落在龙身前，
+       龙在卡片背后继续腾到停，最后一帧停住当底纹，视觉上不会有「龙卡在半空」 */
     var STEP = { 1: 0.30, 2: 0.24, 3: 0.17, 4: 0.13, 5: 0.10, 6: 0.10 };
     var step = STEP[n] || 0.12;
     var base = 3.35;
@@ -506,15 +508,15 @@
     seedStardust();
     /* 龙播放期间不走 canvas 特效、不落彩屑，全部等到卡片阶段再开始 */
     rainT0 = performance.now() + 2900;
-    setTimeout(dragonRush, 3000);
-    setTimeout(dragonPlay, 350);
-    setTimeout(confettiBurst, 3350);
+    bset(dragonRush, 3000);
+    bset(dragonPlay, 350);
+    bset(confettiBurst, 3350);
     if (fx) {
-      setTimeout(function () { starBurst(fx.width * 0.5, fx.height * 0.5, 12); }, 3350);
+      bset(function () { starBurst(fx.width * 0.5, fx.height * 0.5, 12); }, 3350);
     }
     /* 每张卡落定的瞬间补一次星屑与轻响，和砸落节奏对齐 */
     winners.forEach(function (_, i) {
-      setTimeout(function () {
+      bset(function () {
         var el = box.children[i];
         if (el && el.getBoundingClientRect) {
           var r = el.getBoundingClientRect();
@@ -529,6 +531,7 @@
   }
 
   function closeBigScreen() {
+    clearAllBigTimers();
     $('bigscreen').hidden = true;
     document.body.style.overflow = '';
     stopControls();
@@ -712,7 +715,7 @@
     fctx.clearRect(0, 0, fx.width, fx.height);
 
     var W = fx.width, H = fx.height;
-    var DUR = 2600;
+    var DUR = 1900;
     var t0 = performance.now();
 
     var rings = [
@@ -791,14 +794,25 @@
   var dragonTimer = 0;
   var dragonWait = 0;
 
+  /* 开奖过程中的所有延时统一登记，关屏时一次性清掉，
+     否则提前关掉大屏，龙与特效还会在后台继续触发 */
+  var bigTimers = [];
+  function bset(fn, ms) { bigTimers.push(setTimeout(fn, ms)); }
+  function clearAllBigTimers() {
+    for (var i = 0; i < bigTimers.length; i++) clearTimeout(bigTimers[i]);
+    bigTimers = [];
+  }
+  var dragonWatch = 0;
+
   /* 金龙视觉收尾：只负责解冻背景，不再把静态龙拉回来（避免播完又冒出一条） */
-  function showDragonStill() {
+  function dragonStill() {
     document.body.classList.remove('dragon-run');
   }
 
   /* 视频不可用、未就绪或系统开了减少动效时的兜底：
-     静态金龙持续显形 3.2 秒，与视频等长，保证任何情况下开奖都一定有龙 */
+     静态金龙持续显形 3.2 秒，保证任何情况下开奖都一定有龙 */
   function dragonFallback() {
+    clearInterval(dragonWatch);
     document.body.classList.remove('dragon-run');
     var d = $('bsDragon');
     if (!d) return;
@@ -808,59 +822,113 @@
     dragonTimer = setTimeout(function () { d.classList.remove('show'); }, 3200);
   }
 
+  /* 卡死救援：一帧冻在屏幕中间比没有龙更难看，直接换静态金龙顶上 */
+  function dragonStall(v) {
+    clearInterval(dragonWatch);
+    clearTimeout(dragonTimer);
+    clearTimeout(dragonWait);
+    document.body.classList.remove('dragon-run');
+    if (v) {
+      v.classList.remove('play');
+      try { v.pause(); } catch (e) {}
+    }
+    dragonFallback();
+  }
+
   function dragonStart(v) {
-    try { v.currentTime = 0; } catch (e) {}
+    clearTimeout(dragonTimer);
+    clearTimeout(dragonWait);
+    clearInterval(dragonWatch);
+    v.classList.remove('lowfx');
     v.classList.add('play');
-    /* 低芯设备主动卸掉遮罩与滤镜，只留 screen 混合这条最快的路径 */
-    var cores = navigator.hardwareConcurrency || 8;
-    if (cores <= 4) v.classList.add('lowfx');
     document.body.classList.add('dragon-run');
     var d = $('bsDragon');
     if (d) { d.classList.remove('show'); d.classList.add('hide'); }
-    /* 龙只播前 3.2 秒：随后淡出、让位给卡片，避免视频与卡片动画同帧竞争 */
-    clearTimeout(dragonTimer);
-    dragonTimer = setTimeout(function () {
-      v.classList.remove('play');
-      try { v.pause(); } catch (e) {}
-      showDragonStill();
-    }, 3200);
-    v.onended = function () { v.classList.remove('play'); showDragonStill(); };
-    /* 播放途中缓冲就卸掉遮罩与滤镜；若一直出不来画面，直接切静态金龙兜底 */
-    v.onwaiting = function () { if (v.currentTime > 0.6) v.classList.add('lowfx'); };
-    var pr = null;
-    try { pr = v.play(); } catch (e) { v.classList.remove('play'); dragonFallback(); return; }
-    if (pr && pr.catch) {
-      pr.catch(function () {
-        clearTimeout(dragonTimer);
-        v.classList.remove('play');
-        dragonFallback();
-      });
+
+    /* 解码体检：只让真的在出帧的播放继续。0.7 秒内不足 8 帧（≈11fps），
+       或时间轴 450ms 不往前走，判定为卡住，立刻换静态金龙 */
+    var frames = 0, winAt = performance.now(), lastT = -1, moveAt = winAt;
+    if (v.requestVideoFrameCallback) {
+      (function count() {
+        v.requestVideoFrameCallback(function () { frames++; count(); });
+      })();
     }
+    dragonWatch = setInterval(function () {
+      var now = performance.now();
+      if (!v.classList.contains('play') || v.ended) { clearInterval(dragonWatch); return; }
+      if (v.currentTime > lastT + 0.002) { lastT = v.currentTime; moveAt = now; }
+      if (now - moveAt > 450) { dragonStall(v); return; }
+      if (now - winAt >= 700) {
+        if (frames < 8) v.classList.add('lowfx');
+        if (frames < 4) { dragonStall(v); return; }
+        frames = 0; winAt = now;
+      }
+    }, 120);
+
+    /* 整条片子放完（约 5.4 秒）：停在最后一帧，让中奖卡压在龙头上，1.6 秒后再淡出 */
+    v.onended = function () {
+      clearInterval(dragonWatch);
+      clearTimeout(dragonTimer);
+      dragonTimer = setTimeout(function () {
+        v.classList.remove('play');
+        dragonStill();
+      }, 1600);
+    };
+    /* 中途缓冲：给 600ms 机会，仍不出帧就当卡死处理 */
+    v.onwaiting = function () {
+      v.classList.add('lowfx');
+      clearTimeout(dragonTimer);
+      dragonTimer = setTimeout(function () {
+        if (v.readyState < 3) dragonStall(v);
+      }, 600);
+    };
+    v.onplaying = function () { v.classList.remove('lowfx'); };
+
+    var pr = null;
+    try { pr = v.play(); } catch (e) { dragonStall(v); return; }
+    if (pr && pr.catch) pr.catch(function () { dragonStall(v); });
   }
 
   function dragonPlay() {
     var v = $('bsDragonVideo');
     clearTimeout(dragonTimer);
     clearTimeout(dragonWait);
+    clearInterval(dragonWatch);
     if (!v || reduceMotion()) { dragonFallback(); return; }
     v.classList.remove('lowfx');
     v.classList.remove('play');
-    /* 缓冲就绪后才显示并播放，避免先冒出黑帧；等不到就切静态金龙，保证一定有龙 */
-    var tries = window.innerWidth > 900 ? 12 : 6;
-    (function waitReady() {
-      if (v.readyState >= 3) { dragonStart(v); return; }
-      if (tries <= 0) { dragonFallback(); return; }
-      tries--;
-      dragonWait = setTimeout(waitReady, 125);
-    })();
+    /* 就绪立刻开播；900ms 还出不来第一帧就直接上静态金龙，开奖不能空着 */
+    if (v.readyState >= 3) { dragonStart(v); return; }
+    var done = false;
+    function go() {
+      if (done) return;
+      done = true;
+      v.removeEventListener('canplay', go);
+      v.removeEventListener('canplaythrough', go);
+      clearTimeout(dragonWait);
+      dragonStart(v);
+    }
+    v.addEventListener('canplay', go);
+    v.addEventListener('canplaythrough', go);
+    dragonWait = setTimeout(function () {
+      if (done) return;
+      done = true;
+      v.removeEventListener('canplay', go);
+      v.removeEventListener('canplaythrough', go);
+      if (v.readyState >= 2) dragonStart(v); else dragonFallback();
+    }, 900);
   }
 
   function stopDragon() {
     clearTimeout(dragonTimer);
     clearTimeout(dragonWait);
+    clearInterval(dragonWatch);
     document.body.classList.remove('dragon-run');
     var v = $('bsDragonVideo');
     if (v) {
+      v.onended = null;
+      v.onwaiting = null;
+      v.onplaying = null;
       v.classList.remove('play');
       v.classList.remove('lowfx');
       try { v.pause(); } catch (e) {}

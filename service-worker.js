@@ -2,11 +2,11 @@
    策略：页面 Network First，静态资源 Cache First
    网络资源：字体 / hero 图片 / 页面本身
 */
-const CACHE = 'xiaoyu-home-v13';
+const CACHE = 'xiaoyu-home-v14';
 const ASSETS = [
   './',
   './index.html',
-  './style.css?v=68',
+  './style.css?v=69',
   './app.js?v=65',
   './manifest.json',
   './robots.txt',
@@ -35,6 +35,10 @@ self.addEventListener('fetch', (e) => {
 
   // 主播抽奖台不接管缓存，永远取网络最新版
   if (/host\.(html|js)($|\?)/.test(req.url)) return;
+
+  // 音视频一律交给浏览器原生分段读取：Cache Storage 只能回整段，
+  // Range 请求被吃掉后播放器拿不到可 seek 的响应，起播慢、一路一卡一卡
+  if (/\.(mp4|webm|m4a|mp3|m3u8)($|\?)/i.test(req.url) || req.headers.get('range')) return;
 
   // 页面优先取最新版，断网时回退到缓存
   if (req.mode === 'navigate') {
