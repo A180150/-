@@ -503,6 +503,7 @@
       dim.classList.add('on');
     }
     seedStardust();
+    rainT0 = performance.now();
     setTimeout(dragonRush, 320);
     setTimeout(dragonPlay, 350);
     setTimeout(confettiBurst, 300);
@@ -607,33 +608,39 @@
     });
   }
 
+  /* 彩屑雨只在开奖后几秒内落，平时不持续生成，避免长期占用一整个全屏 canvas */
+  var rainT0 = -1e9;
+  var bsEl = null;
   (function loop() {
     if (!ctx) return;
-    ctx.clearRect(0, 0, cv.width, cv.height);
-    var bigOpen = $('bigscreen') && !$('bigscreen').hidden;
-    if (bigOpen && Math.random() < 0.22) confettiRain();
-    for (var i = bits.length - 1; i >= 0; i--) {
-      var b = bits[i];
-      b.x += b.vx;
-      b.y += b.vy;
-      b.vy += 0.09;
-      b.vx *= 0.99;
-      b.rot += b.vr;
-      b.life--;
-      if (b.y > cv.height + 40 || b.life <= 0) { bits.splice(i, 1); continue; }
-      ctx.save();
-      ctx.globalAlpha = Math.max(0, Math.min(1, b.life / 60)) * b.a;
-      ctx.translate(b.x, b.y);
-      ctx.rotate(b.rot);
-      ctx.fillStyle = b.c;
-      if (b.round) {
-        ctx.beginPath();
-        ctx.arc(0, 0, b.w / 2, 0, Math.PI * 2);
-        ctx.fill();
-      } else {
-        ctx.fillRect(-b.w / 2, -b.h / 2, b.w, b.h);
+    if (!bsEl) bsEl = $('bigscreen');
+    var bigOpen = bsEl && !bsEl.hidden;
+    if (bigOpen && performance.now() - rainT0 < 3600 && Math.random() < 0.22) confettiRain();
+    if (bits.length) {
+      ctx.clearRect(0, 0, cv.width, cv.height);
+      for (var i = bits.length - 1; i >= 0; i--) {
+        var b = bits[i];
+        b.x += b.vx;
+        b.y += b.vy;
+        b.vy += 0.09;
+        b.vx *= 0.99;
+        b.rot += b.vr;
+        b.life--;
+        if (b.y > cv.height + 40 || b.life <= 0) { bits.splice(i, 1); continue; }
+        ctx.save();
+        ctx.globalAlpha = Math.max(0, Math.min(1, b.life / 60)) * b.a;
+        ctx.translate(b.x, b.y);
+        ctx.rotate(b.rot);
+        ctx.fillStyle = b.c;
+        if (b.round) {
+          ctx.beginPath();
+          ctx.arc(0, 0, b.w / 2, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          ctx.fillRect(-b.w / 2, -b.h / 2, b.w, b.h);
+        }
+        ctx.restore();
       }
-      ctx.restore();
     }
     requestAnimationFrame(loop);
   })();
@@ -712,6 +719,12 @@
     ];
     fxStars = [];
 
+    /* 龙珠渐变只建一次，逐帧只调 globalAlpha，省掉每帧新建渐变的开销 */
+    var bead = fctx.createRadialGradient(W * 0.5, H * 0.5, 0, W * 0.5, H * 0.5, 190);
+    bead.addColorStop(0, 'rgba(255,252,242,1)');
+    bead.addColorStop(0.32, 'rgba(242,215,159,.52)');
+    bead.addColorStop(1, 'rgba(217,168,98,0)');
+
     function path(t) {
       var x = -0.2 * W + t * 1.4 * W;
       var y = H * 0.6 - Math.sin(t * Math.PI * 1.06) * H * 0.27 + Math.sin(t * Math.PI * 4.4) * H * 0.04;
@@ -754,14 +767,11 @@
       /* 龙珠：中心金光，随龙掠过一起呼吸 */
       if (el < 1900) {
         var cA = el < 1500 ? 1 : (1900 - el) / 400;
-        var cx2 = W * 0.5, cy2 = H * 0.5;
         var cp = 0.8 + 0.2 * Math.sin(el / 85);
-        var cg2 = fctx.createRadialGradient(cx2, cy2, 0, cx2, cy2, 190);
-        cg2.addColorStop(0, 'rgba(255,252,242,' + (0.5 * cp * cA) + ')');
-        cg2.addColorStop(0.32, 'rgba(242,215,159,' + (0.26 * cp * cA) + ')');
-        cg2.addColorStop(1, 'rgba(217,168,98,0)');
-        fctx.fillStyle = cg2;
-        fctx.beginPath(); fctx.arc(cx2, cy2, 190, 0, Math.PI * 2); fctx.fill();
+        fctx.globalAlpha = 0.5 * cp * cA;
+        fctx.fillStyle = bead;
+        fctx.beginPath(); fctx.arc(W * 0.5, H * 0.5, 190, 0, Math.PI * 2); fctx.fill();
+        fctx.globalAlpha = 1;
       }
 
       /* 星芒迸射 */
@@ -800,10 +810,12 @@
   function showDragonStill() {
     var d = $('bsDragon');
     if (d) d.classList.remove('hide');
+    document.body.classList.remove('dragon-run');
   }
 
   /* 视频素材不可用时的降级：静态金龙留在原位并掠场 */
   function dragonFallback() {
+    document.body.classList.remove('dragon-run');
     var d = $('bsDragon');
     if (!d) return;
     d.classList.remove('hide');
@@ -813,6 +825,7 @@
   function dragonStart(v) {
     try { v.currentTime = 0; } catch (e) {}
     v.classList.add('play');
+    document.body.classList.add('dragon-run');
     var d = $('bsDragon');
     if (d) d.classList.add('hide');
     /* 播完自然淡出；5.4 秒兜底，防止 ended 未触发时定格挡住名字 */
@@ -854,6 +867,7 @@
   function stopDragon() {
     clearTimeout(dragonTimer);
     clearTimeout(dragonWait);
+    document.body.classList.remove('dragon-run');
     var v = $('bsDragonVideo');
     if (v) {
       v.classList.remove('play');

@@ -1661,22 +1661,21 @@ a.hs-btn{display:flex;align-items:center;justify-content:center;text-align:cente
 /* 金龙视频层：黑底经 screen 混合融入金黑背景，压在卡片之下（龙在卡片背后腾跃） */
 .bs-dragon-video{
   position:absolute;left:50%;top:47%;
-  width:min(88vw,1180px);aspect-ratio:16/9;
+  width:min(86vw,1040px);aspect-ratio:16/9;
   transform:translate(-50%,-50%);
   z-index:1;pointer-events:none;
   opacity:0;transition:opacity .55s ease;
   mix-blend-mode:screen;
-  filter:contrast(1.32) brightness(1.05);
-  -webkit-mask-image:radial-gradient(ellipse 96% 92% at 50% 46%,#000 28%,rgba(0,0,0,.62) 58%,rgba(0,0,0,.2) 76%,transparent 88%),
-    linear-gradient(180deg,#000 62%,rgba(0,0,0,.55) 84%,transparent 97%);
-  -webkit-mask-composite:source-in;
-  mask-image:radial-gradient(ellipse 96% 92% at 50% 46%,#000 28%,rgba(0,0,0,.62) 58%,rgba(0,0,0,.2) 76%,transparent 88%),
-    linear-gradient(180deg,#000 62%,rgba(0,0,0,.55) 84%,transparent 97%);
-  mask-composite:intersect;
+  filter:contrast(1.28);
+  -webkit-mask-image:radial-gradient(ellipse 94% 100% at 50% 46%,#000 36%,rgba(0,0,0,.62) 64%,rgba(0,0,0,.2) 82%,transparent 96%);
+  mask-image:radial-gradient(ellipse 94% 100% at 50% 46%,#000 36%,rgba(0,0,0,.62) 64%,rgba(0,0,0,.2) 82%,transparent 96%);
 }
 .bs-dragon-video.play{opacity:1}
-/* 播放中若出现缓冲卡顿，自动去掉滤镜链，减少每帧合成开销 */
-.bs-dragon-video.lowfx{filter:none}
+/* 播放中若出现缓冲或掉帧，卸掉滤镜与遮罩，只留 screen 混合，最省合成开销 */
+.bs-dragon-video.lowfx{filter:none;-webkit-mask-image:none;mask-image:none}
+/* 金龙播放期间冻结背景旋转与星屑：此刻龙与卡片是唯一动态源，避免多路动画抢帧 */
+body.dragon-run .bs-rays,
+body.dragon-run .bs-stardust i{animation-play-state:paused}
 
 /* 竖屏手机：16:9 视频按宽度放大铺满上半屏，两侧超出裁掉，龙才够大够醒目 */
 @media (max-width:900px){
