@@ -508,7 +508,7 @@
     setTimeout(dragonPlay, 350);
     setTimeout(confettiBurst, 300);
     if (fx) {
-      setTimeout(function () { starBurst(fx.width * 0.5, fx.height * 0.5, 20); }, 620);
+      setTimeout(function () { starBurst(fx.width * 0.5, fx.height * 0.5, 12); }, 620);
     }
     /* 每张卡落定的瞬间补一次星屑与轻响，和砸落节奏对齐 */
     winners.forEach(function (_, i) {
@@ -518,8 +518,8 @@
           var r = el.getBoundingClientRect();
           var cx = r.left + r.width / 2;
           var cy = r.top + Math.min(r.height * 0.5, 220);
-          confettiBurst(cx, cy, 46);
-          starBurst(cx, cy, 8);
+          confettiBurst(cx, cy, 22);
+          starBurst(cx, cy, 5);
         }
         if (soundOn) sfxTick();
       }, Math.round((base + i * step) * 1000) + 60);
@@ -714,16 +714,9 @@
     var t0 = performance.now();
 
     var rings = [
-      { born: 90, r0: 70, r1: Math.max(W, H) * 0.95 },
-      { born: 420, r0: 40, r1: Math.max(W, H) * 0.62 }
+      { born: 90, r0: 70, r1: Math.max(W, H) * 0.95 }
     ];
     fxStars = [];
-
-    /* 龙珠渐变只建一次，逐帧只调 globalAlpha，省掉每帧新建渐变的开销 */
-    var bead = fctx.createRadialGradient(W * 0.5, H * 0.5, 0, W * 0.5, H * 0.5, 190);
-    bead.addColorStop(0, 'rgba(255,252,242,1)');
-    bead.addColorStop(0.32, 'rgba(242,215,159,.52)');
-    bead.addColorStop(1, 'rgba(217,168,98,0)');
 
     function path(t) {
       var x = -0.2 * W + t * 1.4 * W;
@@ -763,16 +756,6 @@
         fctx.beginPath(); fctx.arc(cx, cy, rad * 0.94, 0, Math.PI * 2); fctx.stroke();
       }
       fctx.globalAlpha = 1;
-
-      /* 龙珠：中心金光，随龙掠过一起呼吸 */
-      if (el < 1900) {
-        var cA = el < 1500 ? 1 : (1900 - el) / 400;
-        var cp = 0.8 + 0.2 * Math.sin(el / 85);
-        fctx.globalAlpha = 0.5 * cp * cA;
-        fctx.fillStyle = bead;
-        fctx.beginPath(); fctx.arc(W * 0.5, H * 0.5, 190, 0, Math.PI * 2); fctx.fill();
-        fctx.globalAlpha = 1;
-      }
 
       /* 星芒迸射 */
       var nowT = now;
@@ -825,6 +808,9 @@
   function dragonStart(v) {
     try { v.currentTime = 0; } catch (e) {}
     v.classList.add('play');
+    /* 低芯设备主动卸掉遮罩与滤镜，只留 screen 混合这条最快的路径 */
+    var cores = navigator.hardwareConcurrency || 8;
+    if (cores <= 4) v.classList.add('lowfx');
     document.body.classList.add('dragon-run');
     var d = $('bsDragon');
     if (d) d.classList.add('hide');

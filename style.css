@@ -1661,7 +1661,7 @@ a.hs-btn{display:flex;align-items:center;justify-content:center;text-align:cente
 /* 金龙视频层：黑底经 screen 混合融入金黑背景，压在卡片之下（龙在卡片背后腾跃） */
 .bs-dragon-video{
   position:absolute;left:50%;top:47%;
-  width:min(86vw,1040px);aspect-ratio:16/9;
+  width:min(78vw,920px);aspect-ratio:16/9;
   transform:translate(-50%,-50%);
   z-index:1;pointer-events:none;
   opacity:0;transition:opacity .55s ease;
