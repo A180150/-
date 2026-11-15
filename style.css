@@ -1734,3 +1734,33 @@ a.hs-btn{display:flex;align-items:center;justify-content:center;text-align:cente
 }
 /* 奖项与提示文字加重描影，压住金龙亮部 */
 .bs-prize,.bs-label{text-shadow:0 2px 12px rgba(0,0,0,.9),0 0 30px rgba(0,0,0,.7)}
+
+/* ================= v5.8 开奖节奏：暗场蓄力 → 龙破空 → 名字砸落 ================= */
+/* 压暗层：只压背景与龙之下的空间，卡片登场时已经亮起 */
+.bs-dim{
+  position:absolute;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(126% 94% at 50% 46%,rgba(5,3,2,.95),rgba(3,2,1,.99));
+  opacity:0;
+}
+.bs-dim.on{animation:dimBreath 1.8s cubic-bezier(.42,0,.28,1) both}
+@keyframes dimBreath{
+  0%{opacity:0}
+  10%{opacity:.93}
+  32%{opacity:.9}
+  64%{opacity:.4}
+  100%{opacity:0}
+}
+/* 名字卡从龙环方向砸下：由远及近、由大到小、由虚到实 */
+.bs-card{
+  animation:cardDropIn 1.2s cubic-bezier(.18,1.06,.27,1) both;
+  animation-delay:var(--d,0s);
+}
+@keyframes cardDropIn{
+  0%{opacity:0;transform:perspective(1500px) translateY(-118px) translateZ(-180px) rotateX(-44deg) scale(1.36);filter:blur(24px)}
+  54%{opacity:1;transform:perspective(1500px) translateY(13px) translateZ(0) rotateX(5deg) scale(.984);filter:blur(0)}
+  78%{transform:perspective(1500px) translateY(-5px) rotateX(0) scale(1.007)}
+  100%{opacity:1;transform:none;filter:blur(0)}
+}
+@media (prefers-reduced-motion:reduce){
+  .bs-dim,.bs-dim.on{animation:none!important;opacity:0}
+}

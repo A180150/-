@@ -470,9 +470,13 @@
 
     var box = $('bsWinners');
     var n = Math.min(6, winners.length);
+    /* 节奏跟人数联动：1 人时慢而重，5 人以上快而密；0.92 秒留给暗场与龙破空 */
+    var STEP = { 1: 0.30, 2: 0.24, 3: 0.17, 4: 0.13, 5: 0.10, 6: 0.10 };
+    var step = STEP[n] || 0.12;
+    var base = 0.92;
     box.className = 'bs-winners n' + n;
     box.innerHTML = winners.map(function (p, i) {
-      var d = (0.07 + i * 0.085).toFixed(3);
+      var d = (base + i * step).toFixed(3);
       var dn = displayName(p);
       var label = esc(dn);
       /* 三列以上时在网名与备注之间的「·」处换行，两行各自完整，不硬断字 */
@@ -490,11 +494,22 @@
     $('bigscreen').hidden = false;
     document.body.style.overflow = 'hidden';
     beginControls();
+
+    /* 暗场蓄力：先压黑，龙破空的同时把屏幕重新点亮 */
+    var dim = $('bsDim');
+    if (dim) {
+      dim.classList.remove('on');
+      void dim.offsetWidth;
+      dim.classList.add('on');
+    }
     seedStardust();
-    dragonRush();
-    dragonPlay();
-    if (fx) starBurst(fx.width * 0.5, fx.height * 0.5, 18);
-    confettiBurst();
+    setTimeout(dragonRush, 320);
+    setTimeout(dragonPlay, 350);
+    setTimeout(confettiBurst, 300);
+    if (fx) {
+      setTimeout(function () { starBurst(fx.width * 0.5, fx.height * 0.5, 20); }, 620);
+    }
+    /* 每张卡落定的瞬间补一次星屑与轻响，和砸落节奏对齐 */
     winners.forEach(function (_, i) {
       setTimeout(function () {
         var el = box.children[i];
@@ -506,7 +521,7 @@
           starBurst(cx, cy, 8);
         }
         if (soundOn) sfxTick();
-      }, 340 + i * 85);
+      }, Math.round((base + i * step) * 1000) + 60);
     });
   }
 
@@ -516,6 +531,8 @@
     stopControls();
     stopFx();
     stopDragon();
+    var dim = $('bsDim');
+    if (dim) dim.classList.remove('on');
     $('bsCtrl').classList.remove('show');
     $('bsTip').classList.remove('show');
   }
