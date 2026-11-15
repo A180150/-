@@ -111,9 +111,7 @@ body::after{
   position:sticky;top:0;z-index:40;
   display:flex;align-items:center;justify-content:space-between;gap:16px;
   padding:14px 32px;
-  background:rgba(30,21,13,.76);
-  backdrop-filter:blur(26px) saturate(1.15);
-  -webkit-backdrop-filter:blur(26px) saturate(1.15);
+  background:rgba(28,20,13,.92);
   border-bottom:1px solid rgba(217,168,98,.08);
   box-shadow:0 1px 0 rgba(240,212,154,.06) inset,0 10px 34px rgba(0,0,0,.34);
 }
@@ -231,10 +229,10 @@ main{position:relative;z-index:1}
 }
 
 /* 光晕 */
-.glow{position:absolute;border-radius:50%;filter:blur(140px);pointer-events:none;z-index:0;animation:float 10s ease-in-out infinite;will-change:transform}
-.g1{width:680px;height:680px;left:-9%;top:-24%;background:rgba(217,168,98,.17)}
-.g2{width:620px;height:620px;right:-6%;top:0;background:rgba(194,69,42,.14);animation-delay:-3.4s}
-.g3{width:520px;height:520px;left:32%;bottom:-32%;background:rgba(190,104,52,.16);animation-delay:-6s}
+.glow{position:absolute;border-radius:50%;pointer-events:none;z-index:0;animation:float 10s ease-in-out infinite;will-change:transform}
+.g1{width:680px;height:680px;left:-9%;top:-24%;background:radial-gradient(circle,rgba(217,168,98,.17),rgba(217,168,98,.07) 46%,transparent 72%)}
+.g2{width:620px;height:620px;right:-6%;top:0;background:radial-gradient(circle,rgba(194,69,42,.14),rgba(194,69,42,.06) 46%,transparent 72%);animation-delay:-3.4s}
+.g3{width:520px;height:520px;left:32%;bottom:-32%;background:radial-gradient(circle,rgba(190,104,52,.16),rgba(190,104,52,.07) 46%,transparent 72%);animation-delay:-6s}
 @keyframes float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-26px) scale(1.07)}}
 
 /* 顶部鎏金细线 */
@@ -269,22 +267,14 @@ main{position:relative;z-index:1}
   margin:0;font-family:var(--serif);font-weight:600;
   font-size:clamp(50px,7.4vw,104px);line-height:1.04;letter-spacing:.05em;
   color:var(--cream);position:relative;display:inline-block;
-  text-shadow:0 3px 34px rgba(217,168,98,.14);
-  animation:titleGlow 7.6s ease-in-out infinite;
-}
-@keyframes titleGlow{
-  0%,100%{filter:drop-shadow(0 10px 34px rgba(217,168,98,.06))}
-  50%{filter:drop-shadow(0 10px 52px rgba(217,168,98,.24))}
+  text-shadow:0 3px 34px rgba(217,168,98,.16);
 }
 .title span{
   display:inline-block;
   background:linear-gradient(108deg,#fbeed0,#e7c186 18%,#d9a862 38%,#f7e2b6 54%,#c58f45 72%,#f0d49a 92%);
-  background-size:220% auto;
+  background-size:190% auto;background-position:34% 50%;
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
-  animation:inkFlow 8s ease-in-out infinite;
-  filter:drop-shadow(0 8px 40px rgba(217,168,98,.28));
 }
-@keyframes inkFlow{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
 
 /* 印章 */
 .title-seal{
@@ -385,7 +375,6 @@ main{position:relative;z-index:1}
   background:rgba(22,14,8,.82);
   border:1px solid rgba(217,168,98,.5);
   box-shadow:0 14px 34px rgba(0,0,0,.52),inset 0 1px 0 rgba(240,212,154,.16);
-  backdrop-filter:blur(10px);
   animation:badgeFloat 5.4s ease-in-out infinite;
   white-space:nowrap;
 }
@@ -875,8 +864,8 @@ body.admin .admin-flag{display:inline-flex}
 .truth-text.type-truth{color:var(--gold-pale);text-shadow:0 2px 24px rgba(217,168,98,.3)}
 .truth-text.type-dare{color:var(--ember-light);text-shadow:0 2px 24px rgba(194,69,42,.3)}
 @keyframes truthIn{
-  from{opacity:0;transform:translateY(14px) scale(.96);filter:blur(5px)}
-  to{opacity:1;transform:none;filter:blur(0)}
+  from{opacity:0;transform:translateY(14px) scale(.96)}
+  to{opacity:1;transform:none}
 }
 .truth-actions{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;position:relative}
 .truth-lists{display:grid;grid-template-columns:1fr 1fr;gap:22px}
@@ -955,7 +944,7 @@ body.admin .admin-flag{display:inline-flex}
   position:absolute;left:50%;top:50%;width:min(78vw,720px);aspect-ratio:1;
   transform:translate(-50%,-50%);
   background:radial-gradient(circle,rgba(217,168,98,.26),rgba(194,69,42,.08) 45%,transparent 68%);
-  filter:blur(12px);pointer-events:none;
+  pointer-events:none;
   animation:glowPulse 2.6s ease-in-out infinite;
 }
 @keyframes glowPulse{
@@ -988,18 +977,15 @@ body.admin .admin-flag{display:inline-flex}
   font-family:var(--serif);font-weight:600;line-height:1.15;
   font-size:clamp(40px,9vw,122px);letter-spacing:.08em;
   background:linear-gradient(118deg,#fff8e6,#f5dfb4 26%,#d9a862 52%,#fff3d6 74%,#c58f45);
-  background-size:220% auto;
+  background-size:180% auto;background-position:38% 50%;
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
-  filter:drop-shadow(0 8px 42px rgba(217,168,98,.4));
-  animation:nameFlow 5.4s ease-in-out infinite;
   word-break:break-word;
-  transition:filter .3s,transform .3s;
+  transition:transform .3s;
 }
-@keyframes nameFlow{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
 .stage-name.flash{animation:flashPop .2s ease-out}
 @keyframes flashPop{from{opacity:.42;transform:scale(.982)}to{opacity:1;transform:scale(1)}}
-.stage.fast .stage-name{filter:blur(5px) drop-shadow(0 8px 42px rgba(217,168,98,.28));transform:scale(.968)}
-.stage.slow .stage-name{filter:blur(0) drop-shadow(0 10px 52px rgba(217,168,98,.55));transform:scale(1.035)}
+.stage.fast .stage-name{transform:scale(.968)}
+.stage.slow .stage-name{transform:scale(1.035)}
 .stage-sub{
   margin:clamp(20px,3.4vh,40px) 0 0;
   font-size:clamp(11px,1.3vw,14px);letter-spacing:.3em;color:rgba(242,228,206,.55);
@@ -1010,7 +996,7 @@ body.admin .admin-flag{display:inline-flex}
   z-index:3;padding:10px 20px;border-radius:999px;cursor:pointer;
   background:rgba(242,228,206,.06);border:1px solid rgba(217,168,98,.32);
   color:rgba(242,228,206,.82);font-size:11px;letter-spacing:.2em;
-  backdrop-filter:blur(8px);transition:all .25s;
+  transition:all .25s;
 }
 .stage-skip:hover{background:rgba(217,168,98,.16);border-color:rgba(217,168,98,.68);color:#fff6e2}
 
@@ -1029,7 +1015,7 @@ body.admin .admin-flag{display:inline-flex}
 
 /* 旋转光柱 */
 .bs-rays{
-  position:absolute;inset:-50%;pointer-events:none;
+  position:absolute;inset:-20%;pointer-events:none;
   background:conic-gradient(from 10deg,
     transparent 0deg,rgba(217,168,98,.09) 22deg,transparent 46deg,
     transparent 118deg,rgba(194,69,42,.07) 146deg,transparent 172deg,
@@ -1128,8 +1114,8 @@ body.admin .admin-flag{display:inline-flex}
   background:linear-gradient(90deg,transparent,rgba(240,212,154,.75),transparent);
 }
 @keyframes cardIn{
-  from{opacity:0;transform:translateY(46px) scale(.84);filter:blur(10px)}
-  to{opacity:1;transform:none;filter:blur(0)}
+  from{opacity:0;transform:translateY(46px) scale(.84)}
+  to{opacity:1;transform:none}
 }
 
 /* 中奖印章：卡片内右上角，不旋转出框、不遮挡姓名 */
@@ -1185,7 +1171,7 @@ body.admin .admin-flag{display:inline-flex}
   padding:10px 18px;border-radius:999px;cursor:pointer;
   background:rgba(242,228,206,.06);border:1px solid rgba(217,168,98,.32);
   color:rgba(242,228,206,.82);font-size:11px;letter-spacing:.18em;
-  transition:all .25s;backdrop-filter:blur(8px);
+  transition:all .25s;
 }
 .bs-btn:hover{background:rgba(217,168,98,.16);border-color:rgba(217,168,98,.6);color:#fff6e2}
 .bs-tip{
@@ -1387,7 +1373,6 @@ a.hs-btn{display:flex;align-items:center;justify-content:center;text-align:cente
   display:flex;align-items:center;justify-content:space-between;gap:16px;
   padding:14px clamp(14px,3.4vw,34px);
   background:linear-gradient(180deg,rgba(30,21,13,.97),rgba(24,16,10,.86));
-  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
   border-bottom:1px solid var(--line-2);
 }
 .host-top::after{
@@ -1468,31 +1453,29 @@ a.hs-btn{display:flex;align-items:center;justify-content:center;text-align:cente
   animation-delay:var(--d,0s);
   transform-style:preserve-3d;
   will-change:transform,opacity;
-  isolation:isolate;
 }
 @keyframes cardIn2{
-  0%{opacity:0;transform:perspective(1200px) translateY(70px) rotateX(32deg) scale(.88);filter:blur(16px)}
-  46%{opacity:1;filter:blur(1.5px)}
+  0%{opacity:0;transform:perspective(1200px) translateY(70px) rotateX(32deg) scale(.88)}
+  46%{opacity:1}
   72%{transform:perspective(1200px) translateY(-5px) rotateX(-3deg) scale(1.015)}
-  100%{opacity:1;transform:perspective(1200px) translateY(0) rotateX(0) scale(1);filter:blur(0)}
+  100%{opacity:1;transform:perspective(1200px) translateY(0) rotateX(0) scale(1)}
 }
 /* 卡片内壁暖光，缓慢呼吸 */
 .bs-card::after{
   content:"";position:absolute;inset:0;z-index:0;pointer-events:none;border-radius:inherit;
   background:radial-gradient(120% 96% at 50% 0%,rgba(240,212,154,.16),rgba(217,168,98,.05) 52%,transparent 72%);
-  animation:cardHalo 3.8s ease-in-out infinite;
+  animation:cardHalo 3.8s ease-in-out 1 both;
   animation-delay:calc(var(--d,0s) + .55s);
 }
-@keyframes cardHalo{0%,100%{opacity:.45}50%{opacity:1}}
-/* 落位后一道键光横掠 */
+@keyframes cardHalo{0%{opacity:.45}55%{opacity:1}100%{opacity:.72}}/* 落位后一道键光横掠 */
 .bs-sheen{
   position:absolute;inset:0;z-index:2;pointer-events:none;border-radius:inherit;
   background-image:linear-gradient(104deg,
-    transparent 30%,rgba(255,248,232,.34) 45%,rgba(255,240,214,.6) 50%,
-    rgba(217,168,98,.34) 56%,transparent 72%);
+    transparent 30%,rgba(255,248,232,.5) 45%,rgba(255,240,214,.82) 50%,
+    rgba(217,168,98,.5) 56%,transparent 72%);
   background-size:250% 100%;background-position:-130% 0;background-repeat:no-repeat;
-  mix-blend-mode:screen;opacity:0;
-  animation:sheenSweep 1.6s cubic-bezier(.2,.8,.3,1) both;
+  opacity:0;
+  animation:sheenSweep 1.2s cubic-bezier(.2,.8,.3,1) both;
   animation-delay:calc(var(--d,0s) + .45s);
 }
 @keyframes sheenSweep{
@@ -1507,9 +1490,9 @@ a.hs-btn{display:flex;align-items:center;justify-content:center;text-align:cente
   animation-delay:calc(var(--d,0s) + .24s);
 }
 @keyframes namePop{
-  0%{opacity:0;transform:scale(.88);filter:blur(9px)}
-  52%{opacity:1;filter:blur(0)}
-  100%{opacity:1;transform:scale(1);filter:blur(0)}
+  0%{opacity:0;transform:scale(.92)}
+  52%{opacity:1}
+  100%{opacity:1;transform:scale(1)}
 }
 /* 印章：从高处砸下，落定回弹 */
 .bs-stamp{
@@ -1517,8 +1500,8 @@ a.hs-btn{display:flex;align-items:center;justify-content:center;text-align:cente
   animation-delay:calc(var(--d,0s) + .58s);
 }
 @keyframes stampIn2{
-  0%{opacity:0;transform:rotate(-22deg) scale(3);filter:blur(10px)}
-  50%{opacity:1;transform:rotate(-3deg) scale(.88);filter:blur(0)}
+  0%{opacity:0;transform:rotate(-22deg) scale(3)}
+  50%{opacity:1;transform:rotate(-3deg) scale(.88)}
   74%{transform:rotate(-3deg) scale(1.07)}
   100%{transform:rotate(-3deg) scale(1)}
 }
@@ -1622,7 +1605,7 @@ a.hs-btn{display:flex;align-items:center;justify-content:center;text-align:cente
 .bs-stardust{position:absolute;inset:0;z-index:2;pointer-events:none}
 .bs-stardust i{
   position:absolute;border-radius:50%;background:#fff6e2;
-  box-shadow:0 0 10px rgba(255,246,226,.9),0 0 20px rgba(217,168,98,.5);
+  box-shadow:0 0 8px rgba(255,246,226,.85);
   opacity:0;animation:twinkle 3.6s ease-in-out infinite;
 }
 @keyframes twinkle{
@@ -1661,7 +1644,7 @@ a.hs-btn{display:flex;align-items:center;justify-content:center;text-align:cente
   z-index:1;pointer-events:none;
   opacity:0;transition:opacity .55s ease;
   mix-blend-mode:screen;
-  filter:contrast(1.34) saturate(1.05) brightness(1.05);
+  filter:contrast(1.32) brightness(1.05);
   -webkit-mask-image:radial-gradient(ellipse 96% 92% at 50% 46%,#000 28%,rgba(0,0,0,.62) 58%,rgba(0,0,0,.2) 76%,transparent 88%),
     linear-gradient(180deg,#000 62%,rgba(0,0,0,.55) 84%,transparent 97%);
   -webkit-mask-composite:source-in;
@@ -1759,10 +1742,10 @@ a.hs-btn{display:flex;align-items:center;justify-content:center;text-align:cente
   animation-delay:var(--d,0s);
 }
 @keyframes cardDropIn{
-  0%{opacity:0;transform:perspective(1500px) translateY(-118px) translateZ(-180px) rotateX(-44deg) scale(1.36);filter:blur(10px)}
-  54%{opacity:1;transform:perspective(1500px) translateY(13px) translateZ(0) rotateX(5deg) scale(.984);filter:blur(0)}
+  0%{opacity:0;transform:perspective(1500px) translateY(-118px) translateZ(-180px) rotateX(-44deg) scale(1.36)}
+  54%{opacity:1;transform:perspective(1500px) translateY(13px) translateZ(0) rotateX(5deg) scale(.984)}
   78%{transform:perspective(1500px) translateY(-5px) rotateX(0) scale(1.007)}
-  100%{opacity:1;transform:none;filter:blur(0)}
+  100%{opacity:1;transform:none}
 }
 @media (prefers-reduced-motion:reduce){
   .bs-dim,.bs-dim.on{animation:none!important;opacity:0}

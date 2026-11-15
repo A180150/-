@@ -217,7 +217,7 @@
     /* 5. 背景浮动光点 */
     var particlesBox = $('particles');
     if (particlesBox) {
-      for (var i = 0; i < 26; i++) {
+      for (var i = 0; i < 14; i++) {
         var p = document.createElement('div');
         p.className = 'particle';
         var size = 2 + Math.random() * 6;

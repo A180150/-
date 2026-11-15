@@ -868,7 +868,8 @@
     var el = $('bsStardust');
     if (!el || el.childElementCount) return;
     var out = '';
-    for (var i = 0; i < 46; i++) {
+    var n = window.innerWidth > 900 ? 24 : 16;
+    for (var i = 0; i < n; i++) {
       var sz = (1 + Math.random() * 1.8).toFixed(1);
       out += '<i style="left:' + (Math.random() * 100).toFixed(2) + '%;top:' +
         (Math.random() * 100).toFixed(2) + '%;width:' + sz + 'px;height:' + sz +
