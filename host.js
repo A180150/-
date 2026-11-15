@@ -777,6 +777,7 @@
   }
 
   var dragonTimer = 0;
+  var dragonWait = 0;
 
   /* 视频素材不可用时的降级：改用静态金龙图 + CSS 掠场 */
   function dragonFallback() {
@@ -784,21 +785,17 @@
     if (d) d.classList.add('fly');
   }
 
-  function dragonPlay() {
-    var v = $('bsDragonVideo');
-    clearTimeout(dragonTimer);
-    if (!v || reduceMotion()) return;
-    v.classList.remove('lowfx');
+  function dragonStart(v) {
     try { v.currentTime = 0; } catch (e) {}
     v.classList.add('play');
-    /* 播放途中若出现缓冲卡顿，自动切单层遮罩，减少每帧合成开销 */
-    v.onwaiting = function () { if (v.currentTime > 0.4) v.classList.add('lowfx'); };
-    v.onstalled = v.onwaiting;
-    /* 播完自然淡出；5.2 秒兜底，防止 ended 未触发时定格挡住名字 */
-    dragonTimer = setTimeout(function () { v.classList.remove('play'); }, 5200);
+    /* 播完自然淡出；5.4 秒兜底，防止 ended 未触发时定格挡住名字 */
+    clearTimeout(dragonTimer);
+    dragonTimer = setTimeout(function () { v.classList.remove('play'); }, 5400);
     v.onended = function () { v.classList.remove('play'); };
+    /* 只在播放途中卡顿才降级，首帧缓冲不算 */
+    v.onwaiting = function () { if (v.currentTime > 0.6) v.classList.add('lowfx'); };
     var pr = null;
-    try { pr = v.play(); } catch (e) { dragonFallback(); }
+    try { pr = v.play(); } catch (e) { v.classList.remove('play'); dragonFallback(); return; }
     if (pr && pr.catch) {
       pr.catch(function () {
         clearTimeout(dragonTimer);
@@ -808,11 +805,30 @@
     }
   }
 
+  function dragonPlay() {
+    var v = $('bsDragonVideo');
+    clearTimeout(dragonTimer);
+    clearTimeout(dragonWait);
+    if (!v || reduceMotion()) return;
+    v.classList.remove('lowfx');
+    v.classList.remove('play');
+    /* 缓冲就绪后才显示并播放，避免先冒出黑帧、看起来像龙没出现；最多等 1.5 秒，超时改用静态金龙 */
+    var tries = 12;
+    (function waitReady() {
+      if (v.readyState >= 3) { dragonStart(v); return; }
+      if (tries <= 0) { dragonFallback(); return; }
+      tries--;
+      dragonWait = setTimeout(waitReady, 125);
+    })();
+  }
+
   function stopDragon() {
     clearTimeout(dragonTimer);
+    clearTimeout(dragonWait);
     var v = $('bsDragonVideo');
     if (v) {
       v.classList.remove('play');
+      v.classList.remove('lowfx');
       try { v.pause(); } catch (e) {}
     }
     var d = $('bsDragon');
@@ -929,20 +945,14 @@
     $('bigscreen').addEventListener('mousemove', beginControls);
     $('bigscreen').addEventListener('touchstart', beginControls, { passive: true });
 
-    /* 桌面端页面就绪即刻预取金龙视频并预热到本地缓存，开奖时首帧不掉；手机端不预载，省流量 */
+    /* 桌面端页面就绪即预载金龙视频，开奖时首帧已在缓冲里；手机端不预载，省流量 */
     if (window.innerWidth > 900) {
       setTimeout(function () {
         var v = $('bsDragonVideo');
         if (!v) return;
-        var warm = function () {
-          v.preload = 'auto';
-          try { v.load(); } catch (e) {}
-        };
-        try {
-          fetch('assets/dragon_move.mp4', { cache: 'force-cache' })
-            .then(warm, warm);
-        } catch (e) { warm(); }
-      }, 300);
+        v.preload = 'auto';
+        try { v.load(); } catch (e) {}
+      }, 200);
     }
 
     document.addEventListener('keydown', function (e) {
