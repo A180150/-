@@ -327,9 +327,28 @@
   function applyNames() {
     var list = parseNames($('namesInput').value);
     if (!list.length) { toast('没有解析到名字'); return; }
-    people = list.map(function (p) { return { nick: p.nick, note: p.note, drawn: false, rigged: false }; });
+    /* 重新导入时沿用旧状态：已中奖的人不能因为重导名单又回到奖池 */
+    var oldByKey = {}, oldByNick = {};
+    people.forEach(function (p) {
+      oldByKey[p.nick + '\u0000' + p.note] = p;
+      if (!oldByNick[p.nick]) oldByNick[p.nick] = [];
+      oldByNick[p.nick].push(p);
+    });
+    var carried = 0;
+    people = list.map(function (p) {
+      var old = oldByKey[p.nick + '\u0000' + p.note];
+      if (!old) {
+        var same = oldByNick[p.nick];
+        if (same && same.length === 1) old = same[0];
+      }
+      var np = { nick: p.nick, note: p.note, drawn: !!(old && old.drawn), rigged: !!(old && old.rigged) };
+      if (np.drawn) carried++;
+      return np;
+    });
     render();
-    toast('已导入 ' + people.length + ' 人');
+    toast(carried
+      ? ('已导入 ' + people.length + ' 人 · 沿用 ' + carried + ' 位已中奖')
+      : ('已导入 ' + people.length + ' 人'));
   }
 
   /* ---------------- 抽奖流程 ---------------- */
