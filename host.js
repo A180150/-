@@ -812,8 +812,10 @@
     if (!v || reduceMotion()) return;
     v.classList.remove('lowfx');
     v.classList.remove('play');
-    /* 缓冲就绪后才显示并播放，避免先冒出黑帧、看起来像龙没出现；最多等 1.5 秒，超时改用静态金龙 */
-    var tries = 12;
+    /* 缓冲就绪后才显示并播放，避免先冒出黑帧、看起来像龙没出现
+       手机网络慢，等待窗口收紧到 0.75 秒，达不到就切静态金龙，保证一定有画面 */
+    /* 桌面等 1.5 秒，手机等 0.75 秒；达不到就切静态金龙，保证一定有画面 */
+    var tries = window.innerWidth > 900 ? 12 : 6;
     (function waitReady() {
       if (v.readyState >= 3) { dragonStart(v); return; }
       if (tries <= 0) { dragonFallback(); return; }
@@ -945,15 +947,13 @@
     $('bigscreen').addEventListener('mousemove', beginControls);
     $('bigscreen').addEventListener('touchstart', beginControls, { passive: true });
 
-    /* 桌面端页面就绪即预载金龙视频，开奖时首帧已在缓冲里；手机端不预载，省流量 */
-    if (window.innerWidth > 900) {
-      setTimeout(function () {
-        var v = $('bsDragonVideo');
-        if (!v) return;
-        v.preload = 'auto';
-        try { v.load(); } catch (e) {}
-      }, 200);
-    }
+    /* 桌面端页面就绪即预载金龙视频；手机端 3 秒后也预载，避免开奖时才现下 */
+    setTimeout(function () {
+      var v = $('bsDragonVideo');
+      if (!v) return;
+      v.preload = 'auto';
+      try { v.load(); } catch (e) {}
+    }, window.innerWidth > 900 ? 200 : 3000);
 
     document.addEventListener('keydown', function (e) {
       if (!$('bigscreen').hidden) {

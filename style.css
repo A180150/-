@@ -1675,6 +1675,31 @@ a.hs-btn{display:flex;align-items:center;justify-content:center;text-align:cente
 /* 播放中若出现缓冲卡顿，自动去掉滤镜链，减少每帧合成开销 */
 .bs-dragon-video.lowfx{filter:none}
 
+/* 竖屏手机：16:9 视频按宽度放大铺满上半屏，两侧超出裁掉，龙才够大够醒目 */
+@media (max-width:900px){
+  .bs-dragon-video{
+    width:min(152vw,560px);
+    top:24%;
+  }
+  .bs-dragon{
+    width:min(140vw,520px);
+    top:-1%;
+  }
+  /* 手机两列布局：列宽可压缩，避免长名字把卡片撑出屏幕 */
+  .bs-winners.n2,.bs-winners.n3,.bs-winners.n4,.bs-winners.n5,.bs-winners.n6{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:10px;
+  }
+  .bs-winners.n2 .bs-name,.bs-winners.n3 .bs-name,.bs-winners.n4 .bs-name,
+  .bs-winners.n5 .bs-name,.bs-winners.n6 .bs-name{
+    font-size:clamp(13px,4.2vw,18px);line-height:1.3;letter-spacing:.01em;
+  }
+  .bs-winners.n1 .bs-name{font-size:clamp(30px,10.5vw,56px)}
+  .bs-card{padding:14px 8px 16px;gap:6px}
+  .bs-no{font-size:8px;top:8px;left:8px}
+  .bs-stamp{width:22px;height:22px;font-size:9px;top:6px;right:6px}
+}
+
 /* 降级层：视频不可用时改用静态金龙图掠场 */
 .bs-dragon{
   position:absolute;left:50%;top:-5%;
