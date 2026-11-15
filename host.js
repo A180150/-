@@ -498,13 +498,11 @@
     document.body.style.overflow = 'hidden';
     beginControls();
 
-    /* 暗场蓄力：先压黑，龙破空的同时把屏幕重新点亮 */
+    /* 暗场蓄力：一次性压到位，不做明暗呼吸（那是个整屏动画，会和龙的每帧混合打架） */
     var dim = $('bsDim');
-    if (dim) {
-      dim.classList.remove('on');
-      void dim.offsetWidth;
-      dim.classList.add('on');
-    }
+    if (dim) dim.classList.add('on');
+    /* 大屏盖住下面整块抽奖台，就不再让它和顶栏金线继续参与绘制 */
+    document.body.classList.add('big-open');
     seedStardust();
     /* 龙先完整腾跃：前 4.4 秒画面里只有龙，canvas 光环、彩屑、卡片全部等它走完再上 */
     rainT0 = performance.now() + 4200;
@@ -534,6 +532,7 @@
     clearAllBigTimers();
     $('bigscreen').hidden = true;
     document.body.style.overflow = '';
+    document.body.classList.remove('big-open');
     stopControls();
     stopFx();
     stopDragon();

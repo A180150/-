@@ -1014,7 +1014,6 @@ body.admin .admin-flag{display:inline-flex}
   background:#0a0604;
   display:flex;align-items:center;justify-content:center;
   padding:clamp(14px,2.4vw,34px);
-  animation:bsIn .55s cubic-bezier(.2,.9,.3,1);
 }
 .bigscreen[hidden]{display:none}
 @keyframes bsIn{from{transform:scale(1.02);opacity:0}to{transform:scale(1);opacity:1}}
@@ -1137,9 +1136,10 @@ body.admin .admin-flag{display:inline-flex}
   transform:rotate(-3deg);
   animation:stampIn .56s cubic-bezier(.2,1.25,.35,1) both;
 }
+/* 印章砸落：靠缩放与旋转做出砸感，不用 blur —— 模糊滤镜在卡片密集落下时会逐帧重绘 */
 @keyframes stampIn{
-  0%{opacity:0;transform:rotate(-14deg) scale(2.4);filter:blur(6px)}
-  62%{opacity:1;transform:rotate(-3deg) scale(.93);filter:blur(0)}
+  0%{opacity:0;transform:rotate(-14deg) scale(2.4)}
+  62%{opacity:1;transform:rotate(-3deg) scale(.93)}
   100%{opacity:1;transform:rotate(-3deg) scale(1)}
 }
 .bs-no{
@@ -1194,7 +1194,7 @@ body.admin .admin-flag{display:inline-flex}
   background:rgba(20,13,8,.94);color:#fff3e2;
   font-size:12px;letter-spacing:.18em;
   box-shadow:0 18px 48px rgba(0,0,0,.5),inset 0 1px 0 rgba(240,212,154,.14);
-  backdrop-filter:blur(10px);border:1px solid rgba(217,168,98,.24);
+  border:1px solid rgba(217,168,98,.24);
   opacity:0;pointer-events:none;transition:all .35s cubic-bezier(.2,1.2,.4,1);
 }
 .toast.show{opacity:1;transform:translate(-50%,0)}
@@ -1469,12 +1469,11 @@ a.hs-btn{display:flex;align-items:center;justify-content:center;text-align:cente
   100%{opacity:0;transform:scale(1.3)}
 }
 
-/* 卡片：3D 翻入、落地回弹 */
+/* 卡片：翻入、落地回弹。不再常驻 will-change / preserve-3d：
+   transform 动画本身就会自动提升合成层，常驻只会让六张卡一直各占一层 */
 .bs-card{
   animation:cardIn2 1s cubic-bezier(.16,1.02,.28,1) both;
   animation-delay:var(--d,0s);
-  transform-style:preserve-3d;
-  will-change:transform,opacity;
 }
 @keyframes cardIn2{
   0%{opacity:0;transform:perspective(1200px) translateY(70px) rotateX(32deg) scale(.88)}
@@ -1486,8 +1485,8 @@ a.hs-btn{display:flex;align-items:center;justify-content:center;text-align:cente
 .bs-card::after{
   content:"";position:absolute;inset:0;z-index:0;pointer-events:none;border-radius:inherit;
   background:radial-gradient(120% 96% at 50% 0%,rgba(240,212,154,.16),rgba(217,168,98,.05) 52%,transparent 72%);
-  animation:cardHalo 3.8s ease-in-out 1 both;
-  animation-delay:calc(var(--d,0s) + .55s);
+  animation:cardHalo 1.5s ease-out 1 both;
+  animation-delay:calc(var(--d,0s) + .45s);
 }
 @keyframes cardHalo{0%{opacity:.45}55%{opacity:1}100%{opacity:.72}}/* 落位后一道键光横掠 */
 .bs-sheen{
@@ -1527,14 +1526,16 @@ a.hs-btn{display:flex;align-items:center;justify-content:center;text-align:cente
   74%{transform:rotate(-3deg) scale(1.07)}
   100%{transform:rotate(-3deg) scale(1)}
 }
-/* 文字层级依次上浮 */
-.bs-prize{animation:riseIn .68s cubic-bezier(.16,1,.3,1) both;animation-delay:.06s}
-.bs-label{animation:riseIn .68s cubic-bezier(.16,1,.3,1) both;animation-delay:.16s}
-.bs-head{animation:riseIn .7s ease-out both;animation-delay:.02s}
-.bs-foot{animation:riseIn .8s ease-out both;animation-delay:.28s}
+/* 文字层级依次上浮 —— 全部等到金龙播完（4.3 秒后）才登场，
+   龙腾跃的那段时间画面里只允许有龙，文字不许跟它抢帧 */
+.bs-prize{animation:riseIn .68s cubic-bezier(.16,1,.3,1) both;animation-delay:4.34s}
+.bs-label{animation:riseIn .68s cubic-bezier(.16,1,.3,1) both;animation-delay:4.44s}
+.bs-head{animation:riseIn .7s ease-out both;animation-delay:4.3s}
+.bs-foot{animation:riseIn .8s ease-out both;animation-delay:4.56s}
+/* 文字上浮不再带 blur：模糊滤镜是逐帧重绘，正好压在龙的尾巴上 */
 @keyframes riseIn{
-  from{opacity:0;transform:translateY(12px);filter:blur(6px)}
-  to{opacity:1;transform:none;filter:blur(0)}
+  from{opacity:0;transform:translateY(10px)}
+  to{opacity:1;transform:none}
 }
 .bs-body{overflow-x:hidden}
 
@@ -1615,6 +1616,11 @@ a.hs-btn{display:flex;align-items:center;justify-content:center;text-align:cente
   animation:topFlow 8.5s linear infinite;
 }
 @keyframes topFlow{from{background-position:-110% 0}to{background-position:110% 0}}
+/* 大屏打开时，下面的抽奖台整块不再参与绘制，顶栏那条无限流动的金线也停掉：
+   它们虽然被不透明大屏盖住，浏览器照样会为它们留出合成开销 */
+body.big-open .host-top,
+body.big-open .host-main{visibility:hidden}
+body.big-open .host-top::after{animation:none!important}
 @media (prefers-reduced-motion:reduce){
   .host-top::after{animation:none!important;background-position:50% 0}
 }
@@ -1667,8 +1673,7 @@ a.hs-btn{display:flex;align-items:center;justify-content:center;text-align:cente
   width:min(78vw,920px);aspect-ratio:16/9;
   transform:translate(-50%,-50%);
   z-index:1;pointer-events:none;
-  opacity:0;transition:opacity .55s ease;
-  background:#000;
+  opacity:0;transition:opacity .3s linear;
   mix-blend-mode:screen;
 }
 .bs-dragon-video.play{opacity:1}
@@ -1719,20 +1724,15 @@ body.dragon-run .bs-star{animation-play-state:paused}
 /* ================= v5.8 开奖节奏：暗场蓄力 → 龙破空 → 名字砸落 ================= */
 /* v5.9 大屏内置不透明底板：万一上层渲染被丢一帧，透出来的是这张黑底板，不会露出背后的抽奖台 */
 .bs-underlay{position:absolute;inset:0;z-index:-1;background:#0a0604;pointer-events:none}
-/* 压暗层：只压背景与龙之下的空间，卡片登场时已经亮起 */
+/* 压暗层：只压背景与龙之下的空间。这里必须是「一次性到位」的静态不透明度 ——
+   原来那 1.8 秒的明暗呼吸是一个整屏动画，正好和金龙开头 1.8 秒重叠，
+   等于逼着浏览器每帧重算「动的暗场 + screen 混合的龙」，这才是卡顿的主因 */
 .bs-dim{
   position:absolute;inset:0;z-index:0;pointer-events:none;
   background:radial-gradient(126% 94% at 50% 46%,rgba(5,3,2,.95),rgba(3,2,1,.99));
   opacity:0;
 }
-.bs-dim.on{animation:dimBreath 1.8s cubic-bezier(.42,0,.28,1) both}
-@keyframes dimBreath{
-  0%{opacity:0}
-  10%{opacity:.93}
-  32%{opacity:.9}
-  64%{opacity:.4}
-  100%{opacity:0}
-}
+.bs-dim.on{opacity:.55}
 /* 名字卡从龙环方向砸下：由远及近、由大到小、由虚到实 */
 .bs-card{
   animation:cardDropIn 1.2s cubic-bezier(.18,1.06,.27,1) both;
