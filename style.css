@@ -1656,14 +1656,18 @@ a.hs-btn{display:flex;align-items:center;justify-content:center;text-align:cente
 /* 金龙视频层：黑底经 screen 混合融入金黑背景，压在卡片之下（龙在卡片背后腾跃） */
 .bs-dragon-video{
   position:absolute;left:50%;top:47%;
-  width:min(84vw,1100px);aspect-ratio:16/9;
+  width:min(88vw,1180px);aspect-ratio:16/9;
   transform:translate(-50%,-50%);
   z-index:0;pointer-events:none;
   opacity:0;transition:opacity .55s ease;
   mix-blend-mode:screen;
-  filter:contrast(1.3) brightness(1.06);
-  -webkit-mask-image:radial-gradient(ellipse 96% 96% at 50% 48%,#000 52%,rgba(0,0,0,.55) 82%,transparent 96%);
-  mask-image:radial-gradient(ellipse 96% 96% at 50% 48%,#000 52%,rgba(0,0,0,.55) 82%,transparent 96%);
+  filter:contrast(1.34) saturate(1.05) brightness(1.05);
+  -webkit-mask-image:radial-gradient(ellipse 96% 92% at 50% 46%,#000 28%,rgba(0,0,0,.62) 58%,rgba(0,0,0,.2) 76%,transparent 88%),
+    linear-gradient(180deg,#000 62%,rgba(0,0,0,.55) 84%,transparent 97%);
+  -webkit-mask-composite:source-in;
+  mask-image:radial-gradient(ellipse 96% 92% at 50% 46%,#000 28%,rgba(0,0,0,.62) 58%,rgba(0,0,0,.2) 76%,transparent 88%),
+    linear-gradient(180deg,#000 62%,rgba(0,0,0,.55) 84%,transparent 97%);
+  mask-composite:intersect;
 }
 }
 .bs-dragon-video.play{opacity:1}
@@ -1731,8 +1735,8 @@ a.hs-btn{display:flex;align-items:center;justify-content:center;text-align:cente
 .bs-prize,.bs-label{text-shadow:0 2px 12px rgba(0,0,0,.9),0 0 30px rgba(0,0,0,.7)}
 
 /* ================= v5.8 开奖节奏：暗场蓄力 → 龙破空 → 名字砸落 ================= */
-/* v5.9 大屏打开期间整页兜底为同色黑底：万一渲染层抢不到显存被丢一帧，透出来的也是黑，不会露出背后的抽奖台 */
-html.bs-open,body.bs-open{background:#0a0604;overflow:hidden}
+/* v5.9 大屏内置不透明底板：万一上层渲染被丢一帧，透出来的是这张黑底板，不会露出背后的抽奖台 */
+.bs-underlay{position:absolute;inset:0;z-index:-1;background:#0a0604;pointer-events:none}
 /* 压暗层：只压背景与龙之下的空间，卡片登场时已经亮起 */
 .bs-dim{
   position:absolute;inset:0;z-index:0;pointer-events:none;
